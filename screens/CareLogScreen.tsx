@@ -4,6 +4,7 @@ import {
     ActivityIndicator,
     Alert,
     FlatList,
+    Modal,
     RefreshControl,
     StyleSheet,
     Text,
@@ -23,6 +24,8 @@ export default function CareLogScreen() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [showPlots, setShowPlots] = useState(false);
+    const [showActionModal, setShowActionModal] = useState(false);
+    const [selectedLog, setSelectedLog] = useState<CareLog | null>(null);
 
     const loadLogs = useCallback(async () => {
         if (!employeeId) return;
@@ -100,38 +103,89 @@ export default function CareLogScreen() {
         });
     };
 
+    const handleCardPress = (log: CareLog) => {
+        setSelectedLog(log);
+        setShowActionModal(true);
+    };
+
+    const handleEdit = () => {
+        setShowActionModal(false);
+        console.log('[CareLogScreen] handleEdit - selectedLog:', selectedLog);
+        if (selectedLog && selectedLog.id) {
+            console.log('[CareLogScreen] handleEdit - navigating with id:', selectedLog.id.toString());
+            router.push({
+                pathname: '/care-log-edit',
+                params: {
+                    id: selectedLog.id.toString(),
+                },
+            });
+        } else {
+            console.log('[CareLogScreen] handleEdit - selectedLog or selectedLog.id is missing!');
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!selectedLog || !selectedLog.id) return;
+
+        Alert.alert(
+            'Xác nhận',
+            'Bạn có chắc chắn muốn xóa nhật ký này?',
+            [
+                { text: 'Hủy', style: 'cancel' },
+                {
+                    text: 'Xóa',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setShowActionModal(false);
+                        try {
+                            const result = await careLogService.delete(selectedLog.id!);
+                            if (result.success) {
+                                Alert.alert('Thành công', 'Xóa nhật ký thành công');
+                                loadLogs();
+                            } else {
+                                Alert.alert('Lỗi', result.error || 'Không thể xóa nhật ký');
+                            }
+                        } catch {
+                            Alert.alert('Lỗi', 'Có lỗi xảy ra khi xóa nhật ký');
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
     const renderItem = ({ item }: { item: CareLog }) => (
-        <View style={styles.card}>
-            <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>Lô đất: {item.plot_id}</Text>
-                <Text style={styles.cardDate}>
-                    {new Date(item.dateReport).toLocaleDateString('vi-VN')}
-                </Text>
-            </View>
-
-            <View style={styles.cardBody}>
-                <Text style={styles.label}>Hoạt động:</Text>
-                {item.active.map((act, index) => (
-                    <Text key={index} style={styles.activity}>
-                        • {act}
+        <TouchableOpacity onPress={() => handleCardPress(item)}>
+            <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                    <Text style={styles.cardTitle}>Lô đất: {item.plot_id}</Text>
+                    <Text style={styles.cardDate}>
+                        {new Date(item.dateReport).toLocaleDateString('vi-VN')}
                     </Text>
-                ))}
+                </View>
 
-                {item.weather && (
-                    <Text style={styles.info}>Thời tiết: {item.weather}</Text>
-                )}
+                <View style={styles.cardBody}>
+                    <Text style={styles.label}>Hoạt động:</Text>
+                    {item.active.map((act, index) => (
+                        <Text key={index} style={styles.activity}>
+                            • {act}
+                        </Text>
+                    ))}
 
-                {item.amount && item.unit && (
-                    <Text style={styles.info}>
-                        Vật tư: {item.amount} {item.unit}
-                    </Text>
-                )}
+                    {item.weather && (
+                        <Text style={styles.info}>Thời tiết: {item.weather}</Text>
+                    )}
 
-                {item.notes && <Text style={styles.notes}>Ghi chú: {item.notes}</Text>}
+                    {item.amount && item.unit && (
+                        <Text style={styles.info}>
+                            Vật tư: {item.amount} {item.unit}
+                        </Text>
+                    )}
+
+                    {item.notes && <Text style={styles.notes}>Ghi chú: {item.notes}</Text>}
+                </View>
             </View>
-
-
-        </View>
+        </TouchableOpacity>
     );
 
     if (loading) {
@@ -220,6 +274,36 @@ export default function CareLogScreen() {
                     </View>
                 }
             />
+
+            <Modal
+                visible={showActionModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowActionModal(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowActionModal(false)}
+                >
+                    <View style={styles.modalContent}>
+                        <TouchableOpacity
+                            style={styles.modalButton}
+                            onPress={handleEdit}
+                        >
+                            <Text style={styles.modalButtonText}>Cập nhật</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.modalButton, styles.deleteButton]}
+                            onPress={handleDelete}
+                        >
+                            <Text style={[styles.modalButtonText, styles.deleteButtonText]}>
+                                Xóa
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -357,5 +441,36 @@ const styles = StyleSheet.create({
     errorText: {
         fontSize: 16,
         color: '#666',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 20,
+        width: '80%',
+        maxWidth: 400,
+    },
+    modalButton: {
+        padding: 15,
+        borderRadius: 8,
+        marginVertical: 5,
+        backgroundColor: '#f0f0f0',
+    },
+    modalButtonText: {
+        fontSize: 16,
+        textAlign: 'center',
+        color: '#333',
+        fontWeight: '600',
+    },
+    deleteButton: {
+        backgroundColor: '#ffebee',
+    },
+    deleteButtonText: {
+        color: '#d32f2f',
     },
 });

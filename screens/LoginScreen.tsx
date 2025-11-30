@@ -1,3 +1,5 @@
+import ThemedTextInput from '@/components/themed-text-input';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -8,7 +10,6 @@ import {
     ScrollView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
@@ -20,6 +21,15 @@ export default function LoginScreen() {
     const [loading, setLoading] = useState(false);
     const { login } = useAuth();
     const router = useRouter();
+
+    // theme-aware colors
+    const bg = useThemeColor({ light: '#f3f6f9', dark: '#000' }, 'background');
+    const cardBg = useThemeColor({ light: '#ffffff', dark: '#111' }, 'background');
+    const inputBg = useThemeColor({ light: '#ffffff', dark: '#111' }, 'background');
+    const textColor = useThemeColor({ light: '#0f1720', dark: '#fff' }, 'text');
+    const labelColor = useThemeColor({ light: '#66707a', dark: '#bbb' }, 'text');
+    const buttonBg = useThemeColor({ light: '#0a7ea4', dark: '#66BB6A' }, 'tint');
+    const btnTextColor = useThemeColor({ light: '#ffffff', dark: '#000000' }, 'text');
 
     const handleLogin = async () => {
         if (!username || !password) {
@@ -47,7 +57,7 @@ export default function LoginScreen() {
 
     return (
         <KeyboardAvoidingView
-            style={styles.container}
+            style={[styles.container, { backgroundColor: bg }]}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <ScrollView
@@ -57,16 +67,16 @@ export default function LoginScreen() {
                 <View style={styles.content}>
                     {/* Logo/Title */}
                     <View style={styles.header}>
-                        <Text style={styles.title}>Quản lý Vườn Chanh</Text>
-                        <Text style={styles.subtitle}>Đăng nhập để tiếp tục</Text>
+                        <Text style={[styles.title, { color: textColor }]}>Quản lý Vườn Chanh</Text>
+                        <Text style={[styles.subtitle, { color: labelColor }]}>Đăng nhập để tiếp tục</Text>
                     </View>
 
                     {/* Login Form */}
-                    <View style={styles.form}>
+                    <View style={[styles.form, { backgroundColor: cardBg }]}>
                         <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Tên đăng nhập</Text>
-                            <TextInput
-                                style={styles.input}
+                            <Text style={[styles.label, { color: labelColor }]}>Tên đăng nhập</Text>
+                            <ThemedTextInput
+                                style={[styles.input, { backgroundColor: inputBg, color: textColor }]}
                                 placeholder="Nhập tên đăng nhập"
                                 value={username}
                                 onChangeText={setUsername}
@@ -77,9 +87,9 @@ export default function LoginScreen() {
                         </View>
 
                         <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Mật khẩu</Text>
-                            <TextInput
-                                style={styles.input}
+                            <Text style={[styles.label, { color: labelColor }]}>Mật khẩu</Text>
+                            <ThemedTextInput
+                                style={[styles.input, { backgroundColor: inputBg, color: textColor }]}
                                 placeholder="Nhập mật khẩu"
                                 value={password}
                                 onChangeText={setPassword}
@@ -91,21 +101,21 @@ export default function LoginScreen() {
                         </View>
 
                         <TouchableOpacity
-                            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+                            style={[styles.loginButton, loading && styles.loginButtonDisabled, { backgroundColor: buttonBg }]}
                             onPress={handleLogin}
                             disabled={loading}
                         >
                             {loading ? (
-                                <ActivityIndicator color="#fff" />
+                                <ActivityIndicator color={btnTextColor} />
                             ) : (
-                                <Text style={styles.loginButtonText}>Đăng nhập</Text>
+                                <Text style={[styles.loginButtonText, { color: btnTextColor }]}>Đăng nhập</Text>
                             )}
                         </TouchableOpacity>
                     </View>
 
                     {/* Footer */}
                     <View style={styles.footer}>
-                        <Text style={styles.footerText}>
+                        <Text style={[styles.footerText, { color: labelColor }]}>
                             Phiên bản 1.0.0
                         </Text>
                     </View>
@@ -118,7 +128,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
     },
     scrollContent: {
         flexGrow: 1,
@@ -135,18 +144,14 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 32,
         fontWeight: 'bold',
-        color: '#2E7D32',
         marginBottom: 8,
     },
     subtitle: {
         fontSize: 16,
-        color: '#666',
     },
     form: {
-        backgroundColor: '#fff',
         borderRadius: 12,
         padding: 20,
-        shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
@@ -158,29 +163,24 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#333',
         marginBottom: 8,
     },
     input: {
         borderWidth: 1,
-        borderColor: '#ddd',
         borderRadius: 8,
         padding: 12,
         fontSize: 16,
-        backgroundColor: '#fff',
     },
     loginButton: {
-        backgroundColor: '#4CAF50',
         borderRadius: 8,
         padding: 16,
         alignItems: 'center',
         marginTop: 10,
     },
     loginButtonDisabled: {
-        backgroundColor: '#ccc',
+        opacity: 0.6,
     },
     loginButtonText: {
-        color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
     },
@@ -190,6 +190,5 @@ const styles = StyleSheet.create({
     },
     footerText: {
         fontSize: 12,
-        color: '#999',
     },
 });

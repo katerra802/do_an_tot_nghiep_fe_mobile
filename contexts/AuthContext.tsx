@@ -19,26 +19,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [employeeId, setEmployeeId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+
     // Load user data khi app khởi động
     useEffect(() => {
-        initializeAuth();
-    }, []);
+        (async () => {
+            try {
+                await authService.initializeAuth();
+                const currentUser = await authService.getCurrentUser();
 
-    const initializeAuth = async () => {
-        try {
-            await authService.initializeAuth();
-            const currentUser = await authService.getCurrentUser();
+                if (currentUser) {
+                    setUser(currentUser);
+                    setEmployeeId(currentUser.id); // user.id chính là employee_id từ BE
+                }
 
-            if (currentUser) {
-                setUser(currentUser);
-                setEmployeeId(currentUser.id); // user.id chính là employee_id từ BE
+                // Do not navigate here. Navigation may run before the router is mounted
+                // which causes errors. Let the app's routing logic or individual
+                // screens handle redirects after auth state is initialized.
+            } catch (error) {
+                console.error('Failed to initialize auth:', error);
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            console.error('Failed to initialize auth:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        })();
+    }, []);
 
     const login = async (credentials: LoginCredentials) => {
         try {

@@ -108,6 +108,7 @@ export interface CareLog {
 
 // Types for Development Log
 export interface DevelopmentLog {
+    _id?: number;
     id?: number;
     plot_id: number;
     employee_id: number;
@@ -121,6 +122,7 @@ export interface DevelopmentLog {
 
 // Types for Harvest Log
 export interface HarvestLog {
+    _id?: number;
     id?: number;
     plot_id: number;
     employee_id: number;

@@ -165,4 +165,83 @@ export const diseaseLogService = {
             };
         }
     },
+
+    /**
+     * Cập nhật disease log
+     * @param id - ID của disease log
+     * @param diseaseLogData - Dữ liệu cập nhật
+     * @returns Promise với disease log đã cập nhật
+     */
+    update: async (id: number, diseaseLogData: Partial<DiseaseLogRequest>): Promise<ApiResponse<DiseaseLogResponse>> => {
+        try {
+            const response = await backendApi.put(`/diseases-log/${id}`, diseaseLogData);
+
+            if (response.data.success && response.data.data) {
+                return {
+                    success: true,
+                    data: response.data.data,
+                    message: response.data.message || 'Cập nhật báo cáo bệnh thành công',
+                };
+            }
+
+            return {
+                success: false,
+                error: 'Invalid response format from backend',
+            };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Không thể cập nhật báo cáo bệnh',
+            };
+        }
+    },
+
+    /**
+     * Xóa disease log
+     * @param id - ID của disease log
+     * @returns Promise với kết quả
+     */
+    delete: async (id: number): Promise<ApiResponse<void>> => {
+        try {
+            await backendApi.delete(`/diseases-log/${id}`);
+            // Backend trả về status 204 với .send() - axios coi là success
+            return {
+                success: true,
+                message: 'Xóa báo cáo bệnh thành công',
+            };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Không thể xóa báo cáo bệnh',
+            };
+        }
+    },
+
+    /**
+     * Lấy chi tiết disease log theo ID
+     * @param id - ID của disease log
+     * @returns Promise với disease log
+     */
+    getById: async (id: number): Promise<ApiResponse<DiseaseLogResponse>> => {
+        try {
+            const response = await backendApi.get(`/diseases-log/${id}`);
+
+            if (response.data.success && response.data.data) {
+                return {
+                    success: true,
+                    data: response.data.data,
+                };
+            }
+
+            return {
+                success: false,
+                error: 'Invalid response format',
+            };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Không thể lấy thông tin báo cáo bệnh',
+            };
+        }
+    },
 };

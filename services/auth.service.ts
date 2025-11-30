@@ -156,9 +156,20 @@ export const authService = {
      * Khởi tạo auth state khi app start
      */
     initializeAuth: async (): Promise<void> => {
-        const token = await authService.getAccessToken();
-        if (token) {
-            backendApi.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        try {
+            // On every app start we clear stored tokens and user data so the app
+            // always starts from the login screen (prevents using stale tokens).
+            await Promise.all([
+                AsyncStorage.removeItem(TOKEN_STORAGE_KEY),
+                AsyncStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY),
+                AsyncStorage.removeItem(AUTH_STORAGE_KEY),
+            ]);
+
+            // Ensure axios doesn't hold an old Authorization header
+            delete backendApi.defaults.headers.common['Authorization'];
+        } catch (error) {
+            // swallow — initialization should not crash app
+            console.warn('initializeAuth: failed to clear storage', error);
         }
     },
 };

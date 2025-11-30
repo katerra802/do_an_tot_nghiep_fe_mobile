@@ -4,6 +4,7 @@ import {
     ActivityIndicator,
     Alert,
     FlatList,
+    Modal,
     RefreshControl,
     StyleSheet,
     Text,
@@ -24,6 +25,8 @@ export default function DevelopmentLogScreen() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [showPlots, setShowPlots] = useState(false);
+    const [showActionModal, setShowActionModal] = useState(false);
+    const [selectedLog, setSelectedLog] = useState<DevelopmentLog | null>(null);
 
     const loadLogs = useCallback(async () => {
         if (!employeeId) return;
@@ -98,23 +101,86 @@ export default function DevelopmentLogScreen() {
         });
     };
 
+    const handleCardPress = (log: DevelopmentLog) => {
+        setSelectedLog(log);
+        setShowActionModal(true);
+    };
+
+    const handleEdit = () => {
+        setShowActionModal(false);
+        console.log('[DevelopmentLog] handleEdit selectedLog:', selectedLog);
+        if (selectedLog && (selectedLog._id || selectedLog.id)) {
+            const logId = selectedLog._id ?? selectedLog.id;
+            console.log('[DevelopmentLog] Navigating to edit with id:', logId);
+            router.push({
+                pathname: '/development-log-edit',
+                params: {
+                    id: String(logId),
+                },
+            });
+        } else {
+            console.log('[DevelopmentLog] No selectedLog or _id/id');
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!selectedLog || (!selectedLog._id && !selectedLog.id)) {
+            console.log('[DevelopmentLog] handleDelete: no selectedLog or _id/id');
+            return;
+        }
+
+        const logId = selectedLog._id ?? selectedLog.id;
+
+        console.log('[DevelopmentLog] handleDelete selectedLog id:', logId);
+        Alert.alert(
+            'Xác nhận',
+            'Bạn có chắc chắn muốn xóa nhật ký này?',
+            [
+                { text: 'Hủy', style: 'cancel' },
+                {
+                    text: 'Xóa',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setShowActionModal(false);
+                        try {
+                            console.log('[DevelopmentLog] Calling delete with id:', logId!);
+                            const result = await developmentLogService.delete(logId!);
+                            console.log('[DevelopmentLog] Delete result:', result);
+                            if (result.success) {
+                                Alert.alert('Thành công', 'Xóa nhật ký thành công');
+                                loadLogs();
+                            } else {
+                                Alert.alert('Lỗi', result.error || 'Không thể xóa nhật ký');
+                            }
+                        } catch (error) {
+                            console.error('[DevelopmentLog] Delete error:', error);
+                            Alert.alert('Lỗi', 'Có lỗi xảy ra khi xóa nhật ký');
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
     const renderItem = ({ item }: { item: DevelopmentLog }) => (
-        <View style={styles.card}>
-            <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>Lô đất: {item.plot_id}</Text>
-                <Text style={styles.cardDate}>
-                    {new Date(item.dateReport).toLocaleDateString('vi-VN')}
-                </Text>
-            </View>
+        <TouchableOpacity onPress={() => handleCardPress(item)}>
+            <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                    <Text style={styles.cardTitle}>Lô đất: {item.plot_id}</Text>
+                    <Text style={styles.cardDate}>
+                        {new Date(item.dateReport).toLocaleDateString('vi-VN')}
+                    </Text>
+                </View>
 
-            <View style={styles.cardBody}>
-                <Text style={styles.phase}>
-                    Giai đoạn: <Text style={styles.phaseValue}>{item.phaseDevelopment}</Text>
-                </Text>
+                <View style={styles.cardBody}>
+                    <Text style={styles.phase}>
+                        Giai đoạn: <Text style={styles.phaseValue}>{item.phaseDevelopment}</Text>
+                    </Text>
 
-                {item.notes && <Text style={styles.notes}>Ghi chú: {item.notes}</Text>}
+                    {item.notes && <Text style={styles.notes}>Ghi chú: {item.notes}</Text>}
+                </View>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 
     if (loading) {
@@ -202,6 +268,36 @@ export default function DevelopmentLogScreen() {
                     </View>
                 }
             />
+
+            <Modal
+                visible={showActionModal}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowActionModal(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setShowActionModal(false)}
+                >
+                    <View style={styles.modalContent}>
+                        <TouchableOpacity
+                            style={styles.modalButton}
+                            onPress={handleEdit}
+                        >
+                            <Text style={styles.modalButtonText}>Cập nhật</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.modalButton, styles.deleteButton]}
+                            onPress={handleDelete}
+                        >
+                            <Text style={[styles.modalButtonText, styles.deleteButtonText]}>
+                                Xóa
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </SafeAreaView>
     );
 }
@@ -330,5 +426,36 @@ const styles = StyleSheet.create({
     errorText: {
         fontSize: 16,
         color: '#666',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 20,
+        width: '80%',
+        maxWidth: 400,
+    },
+    modalButton: {
+        padding: 15,
+        borderRadius: 8,
+        marginVertical: 5,
+        backgroundColor: '#f0f0f0',
+    },
+    modalButtonText: {
+        fontSize: 16,
+        textAlign: 'center',
+        color: '#333',
+        fontWeight: '600',
+    },
+    deleteButton: {
+        backgroundColor: '#ffebee',
+    },
+    deleteButtonText: {
+        color: '#d32f2f',
     },
 });
