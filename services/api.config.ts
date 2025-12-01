@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Alert } from 'react-native';
 
 // Cấu hình base URLs
 export const API_CONFIG = {
@@ -47,10 +48,10 @@ backendApi.interceptors.response.use(
     (error) => {
         // Không log 404 errors
         if (error.response && error.response.status !== 404) {
-            console.error('Backend API Error:', error.response.data);
+            Alert.alert('Lỗi', error.response.data.message || 'Lỗi từ Backend API');
         } else if (error.request && !error.response) {
             // Chỉ log khi không có response (network error)
-            console.error('Backend API No Response:', error.request);
+            Alert.alert('Lỗi', 'Không thể kết nối đến Backend API');
         }
         return Promise.reject(error);
     }
@@ -62,10 +63,10 @@ aiApi.interceptors.response.use(
     (error) => {
         // Không log 404 errors
         if (error.response && error.response.status !== 404) {
-            console.error('AI API Error:', error.response.data);
+            Alert.alert('Lỗi', error.response.data.message || 'Lỗi từ AI API');
         } else if (error.request && !error.response) {
             // Chỉ log khi không có response (network error)
-            console.error('AI API No Response:', error.request);
+            Alert.alert('Lỗi', 'Không thể kết nối đến AI API');
         }
         return Promise.reject(error);
     }

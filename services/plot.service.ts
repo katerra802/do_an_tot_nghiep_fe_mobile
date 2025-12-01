@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import { PlotOptionsResponse } from '../types';
 import { backendApi } from './api.config';
 
@@ -24,8 +25,8 @@ export const plotService = {
             }
 
             return null;
-        } catch (error: any) {
-            console.error('[Plot Service] Error fetching plot options:', error);
+        } catch {
+            Alert.alert('Lỗi', 'Không thể lấy danh sách lô đất');
             return null;
         }
     },

@@ -1,38 +1,10 @@
-import { ApiResponse, CareLog, PlotOption } from '../types';
+import { ApiResponse, CareLog } from '../types';
 import { backendApi } from './api.config';
 
 /**
  * Service để quản lý Care Logs (Nhật ký chăm sóc)
  */
 export const careLogService = {
-    /**
-     * Lấy danh sách lô đất còn lại cần chăm sóc
-     * @returns Promise với danh sách plot options
-     */
-    getRemainingPlots: async (): Promise<ApiResponse<PlotOption[]>> => {
-        try {
-            const response = await backendApi.get('/care-log/remaning-plots');
-
-            // Backend trả về: { success: true, message: "", data: [...] }
-            if (response.data.success && response.data.data) {
-                return {
-                    success: true,
-                    data: response.data.data,
-                    message: response.data.message,
-                };
-            }
-
-            return {
-                success: false,
-                error: 'Invalid response format',
-            };
-        } catch (error: any) {
-            return {
-                success: false,
-                error: error.response?.data?.message || 'Không thể lấy danh sách lô đất',
-            };
-        }
-    },
     /**
      * Lấy danh sách care logs theo employee_id
      * @param employeeId - ID của nhân viên

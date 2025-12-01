@@ -21,11 +21,6 @@ export default function HarvestLogEditScreen() {
 
     const logId = params.id ? Number(params.id) : 0;
 
-    // Debug
-    console.log('[HarvestLogEditScreen] params:', params);
-    console.log('[HarvestLogEditScreen] params.id:', params.id);
-    console.log('[HarvestLogEditScreen] logId:', logId);
-
     // Form state
     const [quantity, setQuantity] = useState<string>('');
     const [unit, setUnit] = useState<string>('');
@@ -56,9 +51,7 @@ export default function HarvestLogEditScreen() {
 
     const loadLogData = async () => {
         setLoading(true);
-        console.log('[HarvestLogEditScreen] loadLogData - calling getById with logId:', logId);
         const result = await harvestLogService.getById(logId);
-        console.log('[HarvestLogEditScreen] getById result:', result);
         if (result.success && result.data) {
             const log = result.data;
             setQuantity(log.quantity?.toString() || '');

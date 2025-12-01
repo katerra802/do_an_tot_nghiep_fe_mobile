@@ -23,10 +23,6 @@ export default function CareLogEditScreen() {
 
     const logId = params.id ? Number(params.id) : 0;
 
-    // Debug
-    console.log('[CareLogEditScreen] params:', params);
-    console.log('[CareLogEditScreen] logId:', logId);
-
     // Form state
     const [activeType, setActiveType] = useState<string>('tưới nước');
     const [amount, setAmount] = useState<string>('');
@@ -67,9 +63,7 @@ export default function CareLogEditScreen() {
 
     const loadLogData = async () => {
         setLoading(true);
-        console.log('[CareLogEditScreen] loadLogData - calling getById with logId:', logId);
         const result = await careLogService.getById(logId);
-        console.log('[CareLogEditScreen] getById result:', result);
         if (result.success && result.data) {
             const log = result.data;
             setActiveType(log.active?.[0] || 'tưới nước');

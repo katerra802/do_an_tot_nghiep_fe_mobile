@@ -22,11 +22,6 @@ export default function DevelopmentLogEditScreen() {
 
     const logId = params.id ? Number(params.id) : 0;
 
-    // Debug
-    console.log('[DevelopmentLogEditScreen] params:', params);
-    console.log('[DevelopmentLogEditScreen] params.id:', params.id);
-    console.log('[DevelopmentLogEditScreen] logId:', logId);
-
     // Form state
     const [phaseDevelopment, setPhaseDevelopment] = useState<string>('nảy mầm');
     const [notes, setNotes] = useState<string>('');
@@ -57,9 +52,8 @@ export default function DevelopmentLogEditScreen() {
 
     const loadLogData = async () => {
         setLoading(true);
-        console.log('[DevelopmentLogEditScreen] loadLogData - calling getById with logId:', logId);
         const result = await developmentLogService.getById(logId);
-        console.log('[DevelopmentLogEditScreen] getById result:', result);
+
         if (result.success && result.data) {
             const log = result.data;
             setPhaseDevelopment(log.phaseDevelopment || 'nảy mầm');

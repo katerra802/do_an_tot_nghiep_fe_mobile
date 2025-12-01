@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import { AIDetectionResponse, ApiResponse, DiseaseInfo, DiseaseLogRequest, DiseaseLogResponse, MediaUploadResponse } from '../types';
 import { backendApi } from './api.config';
 import { diseaseService } from './disease.service';
@@ -15,7 +16,7 @@ export const diseaseLogService = {
         const detections = detectionResult.detections || detectionResult.predictions || [];
 
         if (detections.length === 0) {
-            console.warn('[DiseaseLog] No detections found');
+            Alert.alert('Thông báo', 'Không có phát hiện bệnh nào từ AI');
             return null;
         }
 
@@ -26,16 +27,15 @@ export const diseaseLogService = {
 
         const label = bestDetection.class; // label của bệnh (ví dụ: "sauvebua")
 
-        console.log(`[DiseaseLog] Fetching disease info for label: ${label}`);
+        Alert.alert('Thông báo', `Đang lấy thông tin bệnh cho label: ${label}`);
 
         const diseaseInfoResponse = await diseaseService.getByLabel(label);
 
         if (diseaseInfoResponse && diseaseInfoResponse.data.length > 0) {
-            console.log(`[DiseaseLog] Found disease info:`, diseaseInfoResponse.data[0]);
             return diseaseInfoResponse.data[0]; // Lấy bệnh đầu tiên
         }
 
-        console.warn(`[DiseaseLog] No disease info found for label: ${label}`);
+        Alert.alert('Thông báo', `Không tìm thấy thông tin bệnh cho label: ${label}`);
         return null;
     },
     /**
@@ -76,7 +76,7 @@ export const diseaseLogService = {
 
             return null;
         } catch (error: any) {
-            console.error('Upload Image Error:', error);
+            Alert.alert('Lỗi', 'Không thể tải ảnh lên');
             return null;
         }
     },
@@ -101,9 +101,8 @@ export const diseaseLogService = {
 
                 if (uploadResult && uploadResult.data._id) {
                     imageIds.push(uploadResult.data._id);
-                    console.log(`[DiseaseLog] Image uploaded successfully, ID: ${uploadResult.data._id}`);
                 } else {
-                    console.warn('[DiseaseLog] Image upload failed, continuing without image');
+                    Alert.alert('Thông báo', 'Tải ảnh lên thất bại, tiếp tục mà không có ảnh');
                 }
             }
 
@@ -129,7 +128,7 @@ export const diseaseLogService = {
                 error: 'Invalid response format from backend',
             };
         } catch (error: any) {
-            console.error('[DiseaseLog] Create Error:', error);
+            Alert.alert('Lỗi', 'Không thể tạo báo cáo bệnh');
             return {
                 success: false,
                 error: error.response?.data?.message || 'Không thể tạo báo cáo bệnh',

@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import { PlantPlotResponse } from '../types';
 import { backendApi } from './api.config';
 
@@ -26,7 +27,7 @@ export const plantPlotService = {
 
             return null;
         } catch (error: any) {
-            console.error(`[PlantPlot Service] Error fetching plant plots for plot ${plotId}:`, error);
+            Alert.alert('Lỗi', 'Không thể lấy danh sách cây trồng trong lô đất');
             return null;
         }
     },

@@ -121,10 +121,10 @@ export default function HarvestLogScreen() {
 
     const handleEdit = () => {
         setShowActionModal(false);
-        console.log('[HarvestLog] handleEdit selectedLog:', selectedLog);
+
         if (selectedLog && (selectedLog._id || selectedLog.id)) {
             const logId = selectedLog._id ?? selectedLog.id;
-            console.log('[HarvestLog] Navigating to edit with id:', logId);
+
             router.push({
                 pathname: '/harvest-log-edit',
                 params: {
@@ -132,19 +132,16 @@ export default function HarvestLogScreen() {
                 },
             });
         } else {
-            console.log('[HarvestLog] No selectedLog or _id/id');
+
         }
     };
 
     const handleDelete = async () => {
         if (!selectedLog || (!selectedLog._id && !selectedLog.id)) {
-            console.log('[HarvestLog] handleDelete: no selectedLog or _id/id');
             return;
         }
 
         const logId = selectedLog._id ?? selectedLog.id;
-
-        console.log('[HarvestLog] handleDelete selectedLog id:', logId);
         Alert.alert(
             'Xác nhận',
             'Bạn có chắc chắn muốn xóa nhật ký này?',
@@ -156,17 +153,14 @@ export default function HarvestLogScreen() {
                     onPress: async () => {
                         setShowActionModal(false);
                         try {
-                            console.log('[HarvestLog] Calling delete with id:', logId!);
                             const result = await harvestLogService.delete(logId!);
-                            console.log('[HarvestLog] Delete result:', result);
                             if (result.success) {
                                 Alert.alert('Thành công', 'Xóa nhật ký thành công');
                                 loadLogs();
                             } else {
                                 Alert.alert('Lỗi', result.error || 'Không thể xóa nhật ký');
                             }
-                        } catch (error) {
-                            console.error('[HarvestLog] Delete error:', error);
+                        } catch {
                             Alert.alert('Lỗi', 'Có lỗi xảy ra khi xóa nhật ký');
                         }
                     },

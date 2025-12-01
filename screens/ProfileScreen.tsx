@@ -77,7 +77,6 @@ export default function ProfileScreen() {
                 Alert.alert('Lỗi', result.error || 'Không thể đổi mật khẩu');
             }
         } catch (error: any) {
-            console.log('Change password error:', error);
             Alert.alert('Lỗi', error?.response?.data?.message || 'Có lỗi xảy ra khi đổi mật khẩu');
         } finally {
             setChanging(false);

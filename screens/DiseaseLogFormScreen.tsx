@@ -67,30 +67,30 @@ export default function DiseaseLogFormScreen() {
                 try {
                     const data = JSON.parse(detectionParam as string);
                     setDetectionData(data);
-                    console.log('[DiseaseLogForm] Detection data:', data);
+
 
                     // Lấy thông tin bệnh từ database
                     const info = await diseaseLogService.getDiseaseInfoFromDetection(data);
                     if (info) {
                         setDiseaseInfo(info);
-                        console.log('[DiseaseLogForm] Disease info loaded:', info.name);
+
                     } else {
-                        console.warn('[DiseaseLogForm] No disease info found for detection');
+                        Alert.alert('Lỗi', 'Không tìm thấy thông tin bệnh cho kết quả phát hiện');
                     }
-                } catch (error) {
-                    console.error('[DiseaseLogForm] Parse detection data error:', error);
+                } catch {
+                    Alert.alert('Lỗi', 'Không thể phân tích kết quả phát hiện từ AI');
                 }
             } else {
-                console.warn('[DiseaseLogForm] No detection data in params');
+                Alert.alert('Lỗi', 'Không có kết quả phát hiện từ AI');
             }
 
             // Kiểm tra cả capturedImage và image
             const imageParam = params.capturedImage || params.image;
             if (imageParam) {
                 setCapturedImage(imageParam as string);
-                console.log('[DiseaseLogForm] Image URI:', imageParam);
+
             } else {
-                console.warn('[DiseaseLogForm] No image in params');
+                Alert.alert('Lỗi', 'Không có ảnh trong tham số');
             }
         };
 
@@ -116,10 +116,9 @@ export default function DiseaseLogFormScreen() {
             const response = await plantPlotService.getByPlotId(plotId);
             if (response && response.data) {
                 setPlantPlots(response.data);
-                console.log(`[DiseaseLogForm] Loaded ${response.results} plant plots`);
+
             }
-        } catch (error) {
-            console.error('[DiseaseLogForm] Error loading plant plots:', error);
+        } catch {
             Alert.alert('Lỗi', 'Không thể tải danh sách cây trồng');
         } finally {
             setLoadingPlantPlots(false);
@@ -168,8 +167,7 @@ export default function DiseaseLogFormScreen() {
             } else {
                 Alert.alert('Lỗi', result.error || 'Không thể tạo báo cáo');
             }
-        } catch (error) {
-            console.error('[DiseaseLogForm] Submit error:', error);
+        } catch {
             Alert.alert('Lỗi', 'Có lỗi xảy ra khi tạo báo cáo');
         } finally {
             setLoading(false);

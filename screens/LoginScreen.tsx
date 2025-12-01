@@ -56,7 +56,7 @@ export default function LoginScreen() {
                 Alert.alert('Đăng nhập thất bại', result.error || 'Vui lòng kiểm tra lại thông tin');
             }
         } catch (error: any) {
-            console.log('Login error details:', error);
+
             Alert.alert('Lỗi', error?.response?.data?.message || 'Có lỗi xảy ra khi đăng nhập');
         } finally {
             setLoading(false);
@@ -111,7 +111,6 @@ export default function LoginScreen() {
                 Alert.alert('Lỗi', resetResult.error || 'Không thể đặt lại mật khẩu');
             }
         } catch (error: any) {
-            console.log('Reset password error:', error);
             Alert.alert('Lỗi', error?.response?.data?.message || 'Có lỗi xảy ra khi đặt lại mật khẩu');
         } finally {
             setResetting(false);
@@ -181,9 +180,7 @@ export default function LoginScreen() {
                                 <Text style={[styles.loginButtonText, { color: btnTextColor }]}>Đăng nhập</Text>
                             )}
                         </TouchableOpacity>
-                    </View>
-
-                    {/* Footer */}
+                    </View>                    {/* Footer */}
                     <View style={styles.footer}>
                         <Text style={[styles.footerText, { color: labelColor }]}>
                             Phiên bản 1.0.0

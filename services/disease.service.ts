@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import { DiseaseInfoResponse } from '../types';
 import { backendApi } from './api.config';
 
@@ -26,7 +27,7 @@ export const diseaseService = {
 
             return null;
         } catch (error: any) {
-            console.error(`[Disease Service] Error fetching disease by label "${label}":`, error);
+            Alert.alert('Lỗi', `Không thể lấy thông tin bệnh với label "${label}"`);
             return null;
         }
     },

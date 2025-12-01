@@ -1,3 +1,4 @@
+import { Alert } from 'react-native';
 import { AIDetectionResponse } from '../types';
 import { aiApi } from './api.config';
 
@@ -28,7 +29,7 @@ export const aiService = {
             });
             return response.data;
         } catch (error) {
-            console.error('AI Detection Error:', error);
+
             throw error;
         }
     },
@@ -47,30 +48,24 @@ export const aiService = {
     ): WebSocket => {
         // Chuyển từ http sang ws protocol
         const wsUrl = aiApi.defaults.baseURL?.replace('http', 'ws') + '/predict-stream';
-        console.log('[AI Service] 🔌 Creating WebSocket connection to:', wsUrl);
         const ws = new WebSocket(wsUrl);
-
-        ws.onopen = () => {
-            console.log('[AI Service] ✅ WebSocket connected to AI service');
-        };
 
         ws.onmessage = (event) => {
             try {
-                console.log('[AI Service] 📨 Received message from server:', event.data.substring(0, 100));
                 const data = JSON.parse(event.data);
                 onMessage(data);
             } catch (error) {
-                console.error('[AI Service] ❌ Error parsing WebSocket message:', error);
+                Alert.alert('Lỗi', 'Dữ liệu nhận từ AI không hợp lệ');
             }
         };
 
         ws.onerror = (error) => {
-            console.error('[AI Service] ❌ WebSocket error:', error);
+            Alert.alert('Lỗi', 'Lỗi kết nối WebSocket với AI');
             if (onError) onError(error);
         };
 
         ws.onclose = (event) => {
-            console.log(`[AI Service] 🔌 WebSocket connection closed. Code: ${event.code}, Reason: ${event.reason}`);
+            Alert.alert('Thông báo', `Kết nối WebSocket đã đóng. Mã: ${event.code}, Lý do: ${event.reason}`);
             if (onClose) onClose(event);
         };
 
@@ -85,9 +80,8 @@ export const aiService = {
     sendFrame: (ws: WebSocket, imageBase64: string) => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(imageBase64);
-            console.log(`[AI Service] 📤 Frame sent (${(imageBase64.length / 1024).toFixed(2)} KB)`);
         } else {
-            console.warn(`[AI Service] ⚠️ Cannot send frame, WebSocket not open (state: ${ws.readyState})`);
+            Alert.alert('Lỗi', `Không thể gửi frame, WebSocket không mở (trạng thái: ${ws.readyState})`);
         }
     },
 
@@ -109,7 +103,7 @@ export const aiService = {
             const response = await aiApi.get('/');
             return response.data.status === 'ok';
         } catch (error) {
-            console.error('AI Health Check Failed:', error);
+            Alert.alert('Lỗi', 'Kiểm tra trạng thái AI service thất bại');
             return false;
         }
     },

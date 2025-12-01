@@ -35,8 +35,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 // Do not navigate here. Navigation may run before the router is mounted
                 // which causes errors. Let the app's routing logic or individual
                 // screens handle redirects after auth state is initialized.
-            } catch (error) {
-                console.error('Failed to initialize auth:', error);
+            } catch {
+                alert('Lỗi khi khởi tạo xác thực');
             } finally {
                 setIsLoading(false);
             }

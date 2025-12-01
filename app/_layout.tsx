@@ -16,7 +16,6 @@ export default function RootLayout() {
   // Tắt tất cả warnings và errors hiển thị trên màn hình
   useEffect(() => {
     LogBox.ignoreAllLogs(true);
-    console.disableYellowBox = true;
   }, []);
 
   return (

@@ -71,7 +71,6 @@ export default function CameraAIScreen() {
             return () => {
                 // Khi rời khỏi screen (navigate sang form), dừng real-time
                 if (isStreamingRef.current) {
-                    console.log('[Camera] Screen unfocused, stopping real-time...');
                     stopRealTimeDetection();
                 }
             };
@@ -86,7 +85,6 @@ export default function CameraAIScreen() {
     const navigateToDiseaseReport = useCallback((result: AIDetectionResponse) => {
         // Dừng real-time detection trước khi navigate
         if (isStreamingRef.current) {
-            console.log('[Camera] Stopping real-time before navigation...');
             stopRealTimeDetection();
         }
 
@@ -111,12 +109,10 @@ export default function CameraAIScreen() {
             setDetectionResult(null);
             setAnnotatedImage(null);
 
-            console.log('[Capture] Taking photo...');
             const photo = await camera.current.takePhoto();
             const photoUri = `file://${photo.path}`;
             setCapturedImageUri(photoUri);
 
-            console.log('[Capture] Sending to AI...');
             const result = await aiService.detectDisease(photoUri);
 
             setDetectionResult(result);
@@ -142,8 +138,7 @@ export default function CameraAIScreen() {
             } else {
                 Alert.alert('Kết quả', 'Không phát hiện bệnh nào');
             }
-        } catch (error) {
-            console.error('[Capture] Error:', error);
+        } catch {
             Alert.alert('Lỗi', 'Không thể chụp ảnh hoặc phát hiện bệnh');
         } finally {
             setIsDetecting(false);
@@ -152,10 +147,7 @@ export default function CameraAIScreen() {
 
     // Callback để xử lý detection từ frame processor (chạy trên JS thread)
     const handleDetectionData = useCallback((data: AIDetectionResponse) => {
-        console.log('[RealTime] ✅ Received:', data);
-
         if (data.status === 'captured') {
-            console.log('[RealTime] 🎯 High confidence!');
             setDetectionResult(data);
             if (data.processed_media_base64) {
                 setAnnotatedImage(`data:${data.media_type};base64,${data.processed_media_base64}`);
@@ -178,13 +170,11 @@ export default function CameraAIScreen() {
                 );
             }
         } else if (data.detections !== undefined) {
-            console.log(`[RealTime] 👁️ ${data.detections.length} objects`);
             setDetectionResult(data);
 
             // Nếu có detection (bất kể confidence), cho phép tạo báo cáo
             if (data.detections.length > 0) {
                 const highestConf = Math.max(...data.detections.map(d => d.confidence));
-                console.log(`[RealTime] 🔍 Highest confidence: ${highestConf.toFixed(2)}`);
 
                 // Cho phép tạo báo cáo miễn có phát hiện bệnh
                 Alert.alert(
@@ -226,13 +216,12 @@ export default function CameraAIScreen() {
                     // Gửi trực tiếp data URL string (không phải JSON)
                     wsRef.current.send(base64dataUrl);
                     frameCountRef.current++;
-                    console.log(`[RealTime] 📸 Sent frame #${frameCountRef.current}`);
                 }
             };
 
             reader.readAsDataURL(blob);
-        } catch (error) {
-            console.error('[RealTime] Snapshot error:', error);
+        } catch {
+            Alert.alert('Lỗi', 'Không thể chụp và gửi khung hình');
         }
     }, []);
 
@@ -249,17 +238,13 @@ export default function CameraAIScreen() {
         }
 
         try {
-            console.log('[RealTime] 🚀 Starting...');
-
             const ws = aiService.createStreamConnection(
                 handleDetectionData,
                 (error) => {
-                    console.error('[RealTime] ❌ WebSocket error:', error);
                     Alert.alert('Lỗi', 'Mất kết nối với AI service');
                     stopRealTimeDetection();
                 },
                 () => {
-                    console.log('[RealTime] 🔌 WebSocket closed');
                     setIsStreaming(false);
                     isStreamingRef.current = false;
                     wsRef.current = null;
@@ -276,13 +261,11 @@ export default function CameraAIScreen() {
                 }
 
                 const timeout = setTimeout(() => {
-                    console.error('[RealTime] Timeout');
                     resolve(false);
                 }, 5000);
 
                 ws.addEventListener('open', () => {
                     clearTimeout(timeout);
-                    console.log('[RealTime] ✅ WebSocket OPEN');
                     resolve(true);
                 }, { once: true });
 
@@ -293,7 +276,6 @@ export default function CameraAIScreen() {
             });
 
             if (!isOpen || ws.readyState !== WebSocket.OPEN) {
-                console.error('[RealTime] Failed to open');
                 Alert.alert('Lỗi', 'Không thể kết nối WebSocket');
                 if (wsRef.current) {
                     wsRef.current.close();
@@ -306,7 +288,6 @@ export default function CameraAIScreen() {
             isStreamingRef.current = true;
             frameCountRef.current = 0;
             lastFrameTimeRef.current = 0;
-            console.log('[RealTime] ✅ Started');
 
             // Bắt đầu capture frames mỗi 1.5 giây
             const captureInterval = setInterval(() => {
@@ -316,8 +297,7 @@ export default function CameraAIScreen() {
                     clearInterval(captureInterval);
                 }
             }, 1500);
-        } catch (error) {
-            console.error('[RealTime] Error:', error);
+        } catch {
             Alert.alert('Lỗi', 'Không thể kết nối AI service');
             setIsStreaming(false);
             isStreamingRef.current = false;
@@ -325,8 +305,6 @@ export default function CameraAIScreen() {
     };
 
     const stopRealTimeDetection = () => {
-        console.log('[RealTime] 🛑 Stopping...');
-
         isStreamingRef.current = false;
         setIsStreaming(false);
 
@@ -334,15 +312,12 @@ export default function CameraAIScreen() {
             try {
                 aiService.closeStream(wsRef.current);
                 wsRef.current = null;
-                console.log('[RealTime] ✅ WebSocket closed');
-            } catch (error) {
-                console.error('[RealTime] Error closing:', error);
+            } catch {
                 wsRef.current = null;
             }
         }
 
         setDetectionResult(null);
-        console.log('[RealTime] ✅ Stopped');
     };
 
     // Permission check

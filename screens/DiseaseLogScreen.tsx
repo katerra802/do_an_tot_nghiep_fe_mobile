@@ -34,7 +34,6 @@ export default function DiseaseLogScreen() {
     const mutedColor = useThemeColor({}, 'muted');
     const labelColor = useThemeColor({}, 'label');
     const borderColor = useThemeColor({}, 'border');
-    const dividerColor = useThemeColor({}, 'divider');
     const warningColor = useThemeColor({}, 'warning');
     const dangerColor = useThemeColor({}, 'danger');
     const overlayColor = useThemeColor({}, 'overlay');

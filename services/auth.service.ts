@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
 import { ApiResponse, LoginCredentials, LoginResponse, User } from '../types';
 import { backendApi } from './api.config';
 
@@ -169,7 +170,7 @@ export const authService = {
             delete backendApi.defaults.headers.common['Authorization'];
         } catch (error) {
             // swallow — initialization should not crash app
-            console.warn('initializeAuth: failed to clear storage', error);
+            Alert.alert('Lỗi', 'Không thể khởi tạo trạng thái xác thực');
         }
     },
 

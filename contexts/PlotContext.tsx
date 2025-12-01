@@ -28,19 +28,15 @@ export const PlotProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setError(null);
 
         try {
-            console.log('[PlotContext] Loading plots...');
             const response = await plotService.getOptions();
 
             if (response && response.success) {
                 setPlots(response.data);
-                console.log(`[PlotContext] Loaded ${response.results} plots`);
             } else {
                 setError('Không thể tải danh sách lô đất');
-                console.error('[PlotContext] Failed to load plots');
             }
-        } catch (err) {
+        } catch {
             setError('Lỗi khi tải danh sách lô đất');
-            console.error('[PlotContext] Error loading plots:', err);
         } finally {
             setIsLoading(false);
         }

@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import { useThemeColor } from '../hooks/use-theme-color';
 import { careLogService } from '../services/careLog.service';
+import { plotService } from '../services/plot.service';
 import { CareLog, PlotOption } from '../types';
 
 export default function CareLogScreen() {
@@ -60,23 +61,19 @@ export default function CareLogScreen() {
 
     const loadRemainingPlots = async () => {
         try {
-            const result = await careLogService.getRemainingPlots();
-            if (result.success && result.data) {
+            const result = await plotService.getOptions();
+            if (result && result.success && result.data) {
                 setPlots(result.data);
                 setShowPlots(true);
             } else {
-                // Nếu là 404 (không có lô đất), hiển thị danh sách trống
+                // Nếu không có lô đất, hiển thị danh sách trống
                 setPlots([]);
                 setShowPlots(true);
             }
-        } catch (error: any) {
-            // Nếu là 404, hiển thị danh sách trống
-            if (error.response?.status === 404) {
-                setPlots([]);
-                setShowPlots(true);
-            } else {
-                Alert.alert('Lỗi', 'Có lỗi xảy ra khi tải dữ liệu');
-            }
+        } catch {
+            // Nếu có lỗi, hiển thị danh sách trống
+            setPlots([]);
+            setShowPlots(true);
         }
     };
 
@@ -123,9 +120,7 @@ export default function CareLogScreen() {
 
     const handleEdit = () => {
         setShowActionModal(false);
-        console.log('[CareLogScreen] handleEdit - selectedLog:', selectedLog);
         if (selectedLog && selectedLog.id) {
-            console.log('[CareLogScreen] handleEdit - navigating with id:', selectedLog.id.toString());
             router.push({
                 pathname: '/care-log-edit',
                 params: {
@@ -133,8 +128,8 @@ export default function CareLogScreen() {
                 },
             });
         } else {
-            console.log('[CareLogScreen] handleEdit - selectedLog or selectedLog.id is missing!');
-        }
+            Alert.alert('Lỗi', 'Nhật ký không hợp lệ');
+        };
     };
 
     const handleDelete = async () => {
