@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
+import { useThemeColor } from '../hooks/use-theme-color';
 import { developmentLogService } from '../services/developmentLog.service';
 import { plotService } from '../services/plot.service';
 import { DevelopmentLog, PlotOption } from '../types';
@@ -27,6 +28,18 @@ export default function DevelopmentLogScreen() {
     const [showPlots, setShowPlots] = useState(false);
     const [showActionModal, setShowActionModal] = useState(false);
     const [selectedLog, setSelectedLog] = useState<DevelopmentLog | null>(null);
+
+    // Theme colors
+    const bgColor = useThemeColor({}, 'background');
+    const cardBg = useThemeColor({}, 'cardBackground');
+    const textColor = useThemeColor({}, 'text');
+    const mutedColor = useThemeColor({}, 'muted');
+    const labelColor = useThemeColor({}, 'label');
+    const borderColor = useThemeColor({}, 'border');
+    const dividerColor = useThemeColor({}, 'divider');
+    const successColor = useThemeColor({}, 'success');
+    const dangerColor = useThemeColor({}, 'danger');
+    const overlayColor = useThemeColor({}, 'overlay');
 
     const loadLogs = useCallback(async () => {
         if (!employeeId) return;
@@ -108,30 +121,24 @@ export default function DevelopmentLogScreen() {
 
     const handleEdit = () => {
         setShowActionModal(false);
-        console.log('[DevelopmentLog] handleEdit selectedLog:', selectedLog);
         if (selectedLog && (selectedLog._id || selectedLog.id)) {
             const logId = selectedLog._id ?? selectedLog.id;
-            console.log('[DevelopmentLog] Navigating to edit with id:', logId);
             router.push({
                 pathname: '/development-log-edit',
                 params: {
                     id: String(logId),
                 },
             });
-        } else {
-            console.log('[DevelopmentLog] No selectedLog or _id/id');
         }
     };
 
     const handleDelete = async () => {
         if (!selectedLog || (!selectedLog._id && !selectedLog.id)) {
-            console.log('[DevelopmentLog] handleDelete: no selectedLog or _id/id');
             return;
         }
 
         const logId = selectedLog._id ?? selectedLog.id;
 
-        console.log('[DevelopmentLog] handleDelete selectedLog id:', logId);
         Alert.alert(
             'Xác nhận',
             'Bạn có chắc chắn muốn xóa nhật ký này?',
@@ -143,17 +150,14 @@ export default function DevelopmentLogScreen() {
                     onPress: async () => {
                         setShowActionModal(false);
                         try {
-                            console.log('[DevelopmentLog] Calling delete with id:', logId!);
                             const result = await developmentLogService.delete(logId!);
-                            console.log('[DevelopmentLog] Delete result:', result);
                             if (result.success) {
                                 Alert.alert('Thành công', 'Xóa nhật ký thành công');
                                 loadLogs();
                             } else {
                                 Alert.alert('Lỗi', result.error || 'Không thể xóa nhật ký');
                             }
-                        } catch (error) {
-                            console.error('[DevelopmentLog] Delete error:', error);
+                        } catch {
                             Alert.alert('Lỗi', 'Có lỗi xảy ra khi xóa nhật ký');
                         }
                     },
@@ -164,20 +168,20 @@ export default function DevelopmentLogScreen() {
 
     const renderItem = ({ item }: { item: DevelopmentLog }) => (
         <TouchableOpacity onPress={() => handleCardPress(item)}>
-            <View style={styles.card}>
+            <View style={[styles.card, { backgroundColor: cardBg }]}>
                 <View style={styles.cardHeader}>
-                    <Text style={styles.cardTitle}>Lô đất: {item.plot_id}</Text>
-                    <Text style={styles.cardDate}>
+                    <Text style={[styles.cardTitle, { color: textColor }]}>Lô đất: {item.plot_id}</Text>
+                    <Text style={[styles.cardDate, { color: mutedColor }]}>
                         {new Date(item.dateReport).toLocaleDateString('vi-VN')}
                     </Text>
                 </View>
 
                 <View style={styles.cardBody}>
-                    <Text style={styles.phase}>
-                        Giai đoạn: <Text style={styles.phaseValue}>{item.phaseDevelopment}</Text>
+                    <Text style={[styles.phase, { color: labelColor }]}>
+                        Giai đoạn: <Text style={[styles.phaseValue, { color: successColor }]}>{item.phaseDevelopment}</Text>
                     </Text>
 
-                    {item.notes && <Text style={styles.notes}>Ghi chú: {item.notes}</Text>}
+                    {item.notes && <Text style={[styles.notes, { color: mutedColor }]}>Ghi chú: {item.notes}</Text>}
                 </View>
             </View>
         </TouchableOpacity>
@@ -185,30 +189,30 @@ export default function DevelopmentLogScreen() {
 
     if (loading) {
         return (
-            <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#2196F3" />
+            <View style={[styles.centerContainer, { backgroundColor: bgColor }]}>
+                <ActivityIndicator size="large" color={successColor} />
             </View>
         );
     }
 
     if (!isAuthenticated || !employeeId) {
         return (
-            <View style={styles.centerContainer}>
-                <Text style={styles.errorText}>Vui lòng đăng nhập để xem nhật ký</Text>
+            <View style={[styles.centerContainer, { backgroundColor: bgColor }]}>
+                <Text style={[styles.errorText, { color: mutedColor }]}>Vui lòng đăng nhập để xem nhật ký</Text>
             </View>
         );
     }
 
     if (showPlots) {
         return (
-            <SafeAreaView style={styles.container}>
-                <View style={styles.header}>
-                    <Text style={styles.title}>Chọn lô đất</Text>
+            <SafeAreaView style={[styles.container, { backgroundColor: bgColor }]}>
+                <View style={[styles.header, { backgroundColor: cardBg, borderBottomColor: borderColor }]}>
+                    <Text style={[styles.title, { color: textColor }]}>Chọn lô đất</Text>
                     <TouchableOpacity
                         style={styles.closeButton}
                         onPress={() => setShowPlots(false)}
                     >
-                        <Text style={styles.closeButtonText}>✕</Text>
+                        <Text style={[styles.closeButtonText, { color: mutedColor }]}>✕</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -216,15 +220,15 @@ export default function DevelopmentLogScreen() {
                     data={plots}
                     renderItem={({ item }) => (
                         <TouchableOpacity
-                            style={styles.plotCard}
+                            style={[styles.plotCard, { backgroundColor: cardBg, borderLeftColor: successColor }]}
                             onPress={() => handlePlotSelect(item)}
                         >
-                            <Text style={styles.plotName}>{item.name}</Text>
+                            <Text style={[styles.plotName, { color: textColor }]}>{item.name}</Text>
                             <View style={styles.plotInfo}>
-                                <Text style={styles.plotDetail}>
+                                <Text style={[styles.plotDetail, { color: mutedColor }]}>
                                     Diện tích: {item.acreage} m²
                                 </Text>
-                                <Text style={styles.plotDetail}>
+                                <Text style={[styles.plotDetail, { color: mutedColor }]}>
                                     Số cây: {item.numberOfTrees}
                                 </Text>
                             </View>
@@ -234,7 +238,7 @@ export default function DevelopmentLogScreen() {
                     contentContainerStyle={styles.list}
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>
+                            <Text style={[styles.emptyText, { color: mutedColor }]}>
                                 Không có lô đất nào
                             </Text>
                         </View>
@@ -245,11 +249,11 @@ export default function DevelopmentLogScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Nhật ký phát triển</Text>
+        <SafeAreaView style={[styles.container, { backgroundColor: bgColor }]}>
+            <View style={[styles.header, { backgroundColor: cardBg, borderBottomColor: borderColor }]}>
+                <Text style={[styles.title, { color: textColor }]}>Nhật ký phát triển</Text>
                 <TouchableOpacity
-                    style={styles.addButton}
+                    style={[styles.addButton, { backgroundColor: successColor }]}
                     onPress={handleAddNew}
                 >
                     <Text style={styles.addButtonText}>+ Thêm mới</Text>
@@ -264,7 +268,7 @@ export default function DevelopmentLogScreen() {
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>Chưa có nhật ký nào</Text>
+                        <Text style={[styles.emptyText, { color: mutedColor }]}>Chưa có nhật ký nào</Text>
                     </View>
                 }
             />
@@ -276,22 +280,22 @@ export default function DevelopmentLogScreen() {
                 onRequestClose={() => setShowActionModal(false)}
             >
                 <TouchableOpacity
-                    style={styles.modalOverlay}
+                    style={[styles.modalOverlay, { backgroundColor: overlayColor }]}
                     activeOpacity={1}
                     onPress={() => setShowActionModal(false)}
                 >
-                    <View style={styles.modalContent}>
+                    <View style={[styles.modalContent, { backgroundColor: cardBg }]}>
                         <TouchableOpacity
-                            style={styles.modalButton}
+                            style={[styles.modalButton, { backgroundColor: dividerColor }]}
                             onPress={handleEdit}
                         >
-                            <Text style={styles.modalButtonText}>Cập nhật</Text>
+                            <Text style={[styles.modalButtonText, { color: textColor }]}>Cập nhật</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[styles.modalButton, styles.deleteButton]}
+                            style={[styles.modalButton, { backgroundColor: dangerColor + '20' }]}
                             onPress={handleDelete}
                         >
-                            <Text style={[styles.modalButtonText, styles.deleteButtonText]}>
+                            <Text style={[styles.modalButtonText, { color: dangerColor }]}>
                                 Xóa
                             </Text>
                         </TouchableOpacity>
@@ -305,7 +309,6 @@ export default function DevelopmentLogScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
     },
     centerContainer: {
         flex: 1,
@@ -317,16 +320,13 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 15,
-        backgroundColor: '#fff',
         borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
     },
     title: {
         fontSize: 20,
         fontWeight: 'bold',
     },
     addButton: {
-        backgroundColor: '#4CAF50',
         paddingHorizontal: 15,
         paddingVertical: 8,
         borderRadius: 8,
@@ -339,7 +339,6 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     card: {
-        backgroundColor: '#fff',
         borderRadius: 8,
         padding: 15,
         marginBottom: 10,
@@ -357,31 +356,25 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#333',
     },
     cardDate: {
         fontSize: 14,
-        color: '#666',
     },
     cardBody: {
         marginBottom: 10,
     },
     phase: {
         fontSize: 14,
-        color: '#555',
     },
     phaseValue: {
         fontWeight: 'bold',
-        color: '#2196F3',
     },
     notes: {
         fontSize: 14,
-        color: '#666',
         marginTop: 5,
         fontStyle: 'italic',
     },
     plotCard: {
-        backgroundColor: '#fff',
         borderRadius: 12,
         padding: 20,
         marginBottom: 15,
@@ -391,12 +384,10 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
         borderLeftWidth: 4,
-        borderLeftColor: '#2196F3',
     },
     plotName: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
         marginBottom: 10,
     },
     plotInfo: {
@@ -405,14 +396,12 @@ const styles = StyleSheet.create({
     },
     plotDetail: {
         fontSize: 14,
-        color: '#666',
     },
     closeButton: {
         padding: 5,
     },
     closeButtonText: {
         fontSize: 24,
-        color: '#666',
         fontWeight: 'bold',
     },
     emptyContainer: {
@@ -421,20 +410,16 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-        color: '#999',
     },
     errorText: {
         fontSize: 16,
-        color: '#666',
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     modalContent: {
-        backgroundColor: '#fff',
         borderRadius: 12,
         padding: 20,
         width: '80%',
@@ -444,18 +429,10 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 8,
         marginVertical: 5,
-        backgroundColor: '#f0f0f0',
     },
     modalButtonText: {
         fontSize: 16,
         textAlign: 'center',
-        color: '#333',
         fontWeight: '600',
-    },
-    deleteButton: {
-        backgroundColor: '#ffebee',
-    },
-    deleteButtonText: {
-        color: '#d32f2f',
     },
 });

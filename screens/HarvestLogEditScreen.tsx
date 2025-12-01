@@ -1,4 +1,5 @@
 import ThemedTextInput from '@/components/themed-text-input';
+import { useThemeColor } from '@/hooks/use-theme-color';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
@@ -34,6 +35,17 @@ export default function HarvestLogEditScreen() {
 
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+
+    // Theme colors
+    const bgColor = useThemeColor({}, 'background');
+    const cardBg = useThemeColor({}, 'cardBackground');
+    const inputBg = useThemeColor({}, 'inputBackground');
+    const textColor = useThemeColor({}, 'text');
+    const labelColor = useThemeColor({}, 'label');
+    const mutedColor = useThemeColor({}, 'muted');
+    const borderColor = useThemeColor({}, 'border');
+    const dividerColor = useThemeColor({}, 'divider');
+    const successColor = useThemeColor({}, 'success');
 
     useEffect(() => {
         if (logId) {
@@ -104,28 +116,28 @@ export default function HarvestLogEditScreen() {
 
     if (loading) {
         return (
-            <SafeAreaView style={styles.safeArea}>
+            <SafeAreaView style={[styles.safeArea, { backgroundColor: bgColor }]}>
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#2196F3" />
-                    <Text style={styles.loadingText}>Đang tải...</Text>
+                    <ActivityIndicator size="large" color={successColor} />
+                    <Text style={[styles.loadingText, { color: mutedColor }]}>Đang tải...</Text>
                 </View>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: bgColor }]}>
             <ScrollView style={styles.container} contentContainerStyle={styles.content}>
                 <View style={styles.header}>
-                    <Text style={styles.title}>Cập nhật nhật ký thu hoạch</Text>
-                    <Text style={styles.subtitle}>{plotName}</Text>
+                    <Text style={[styles.title, { color: textColor }]}>Cập nhật nhật ký thu hoạch</Text>
+                    <Text style={[styles.subtitle, { color: mutedColor }]}>{plotName}</Text>
                 </View>
 
                 {/* Sản lượng */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Sản lượng *</Text>
+                    <Text style={[styles.label, { color: labelColor }]}>Sản lượng *</Text>
                     <ThemedTextInput
-                        style={styles.input}
+                        style={[styles.input, { backgroundColor: inputBg, borderColor: borderColor }]}
                         placeholder="Nhập sản lượng"
                         keyboardType="numeric"
                         value={quantity}
@@ -135,9 +147,9 @@ export default function HarvestLogEditScreen() {
 
                 {/* Đơn vị */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Đơn vị *</Text>
+                    <Text style={[styles.label, { color: labelColor }]}>Đơn vị *</Text>
                     <ThemedTextInput
-                        style={styles.input}
+                        style={[styles.input, { backgroundColor: inputBg, borderColor: borderColor }]}
                         placeholder="Ví dụ: kg, tấn, quả"
                         value={unit}
                         onChangeText={setUnit}
@@ -146,17 +158,17 @@ export default function HarvestLogEditScreen() {
 
                 {/* Ngày báo cáo */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Ngày báo cáo</Text>
-                    <Text style={styles.dateText}>
+                    <Text style={[styles.label, { color: labelColor }]}>Ngày báo cáo</Text>
+                    <Text style={[styles.dateText, { backgroundColor: dividerColor, color: textColor }]}>
                         {dateReport.toLocaleDateString('vi-VN')}
                     </Text>
                 </View>
 
                 {/* Ghi chú */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Ghi chú</Text>
+                    <Text style={[styles.label, { color: labelColor }]}>Ghi chú</Text>
                     <ThemedTextInput
-                        style={[styles.input, styles.textArea]}
+                        style={[styles.input, styles.textArea, { backgroundColor: inputBg, borderColor: borderColor }]}
                         placeholder="Nhập ghi chú (nếu có)"
                         multiline
                         numberOfLines={4}
@@ -167,7 +179,7 @@ export default function HarvestLogEditScreen() {
 
                 {/* Submit button */}
                 <TouchableOpacity
-                    style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
+                    style={[styles.submitButton, { backgroundColor: submitting ? mutedColor : successColor }]}
                     onPress={handleSubmit}
                     disabled={submitting}
                 >
@@ -179,11 +191,11 @@ export default function HarvestLogEditScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={styles.cancelButton}
+                    style={[styles.cancelButton, { backgroundColor: cardBg, borderColor: borderColor }]}
                     onPress={() => router.back()}
                     disabled={submitting}
                 >
-                    <Text style={styles.cancelButtonText}>Hủy</Text>
+                    <Text style={[styles.cancelButtonText, { color: mutedColor }]}>Hủy</Text>
                 </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
@@ -193,7 +205,6 @@ export default function HarvestLogEditScreen() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
     },
     container: {
         flex: 1,
@@ -209,7 +220,6 @@ const styles = StyleSheet.create({
     loadingText: {
         marginTop: 10,
         fontSize: 16,
-        color: '#666',
     },
     header: {
         marginBottom: 20,
@@ -217,12 +227,10 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#333',
         marginBottom: 5,
     },
     subtitle: {
         fontSize: 16,
-        color: '#666',
     },
     formGroup: {
         marginBottom: 20,
@@ -230,13 +238,10 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#333',
         marginBottom: 8,
     },
     input: {
-        backgroundColor: '#fff',
         borderWidth: 1,
-        borderColor: '#ddd',
         borderRadius: 8,
         padding: 12,
         fontSize: 16,
@@ -246,21 +251,15 @@ const styles = StyleSheet.create({
         textAlignVertical: 'top',
     },
     dateText: {
-        backgroundColor: '#e8e8e8',
         padding: 12,
         borderRadius: 8,
         fontSize: 16,
-        color: '#333',
     },
     submitButton: {
-        backgroundColor: '#4CAF50',
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',
         marginBottom: 10,
-    },
-    submitButtonDisabled: {
-        backgroundColor: '#ccc',
     },
     submitButtonText: {
         color: '#fff',
@@ -268,16 +267,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     cancelButton: {
-        backgroundColor: '#fff',
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#ddd',
         marginBottom: 20,
     },
     cancelButtonText: {
-        color: '#666',
         fontSize: 16,
         fontWeight: '600',
     },

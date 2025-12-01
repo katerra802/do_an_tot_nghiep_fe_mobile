@@ -3,10 +3,10 @@ import axios from 'axios';
 // Cấu hình base URLs
 export const API_CONFIG = {
     // Backend API (sẽ được deploy sau)
-    BACKEND_URL: 'http://192.168.1.6:3000/api', // IP máy tính trong mạng local
+    BACKEND_URL: 'http://192.168.1.7:3000/api', // IP máy tính trong mạng local
 
     // AI Model API (Python FastAPI)
-    AI_URL: 'http://192.168.1.6:8000', // URL của Model AI
+    AI_URL: 'http://192.168.1.7:8000', // URL của Model AI
 };
 
 // Tạo axios instance cho Backend

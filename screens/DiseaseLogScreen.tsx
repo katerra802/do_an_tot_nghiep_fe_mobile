@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
+import { useThemeColor } from '../hooks/use-theme-color';
 import { diseaseLogService } from '../services/diseaseLog.service';
 import { DiseaseLogResponse } from '../types';
 
@@ -25,6 +26,18 @@ export default function DiseaseLogScreen() {
     const [refreshing, setRefreshing] = useState(false);
     const [selectedLog, setSelectedLog] = useState<DiseaseLogResponse | null>(null);
     const [showActionModal, setShowActionModal] = useState(false);
+
+    // Theme colors
+    const bgColor = useThemeColor({}, 'background');
+    const cardBg = useThemeColor({}, 'cardBackground');
+    const textColor = useThemeColor({}, 'text');
+    const mutedColor = useThemeColor({}, 'muted');
+    const labelColor = useThemeColor({}, 'label');
+    const borderColor = useThemeColor({}, 'border');
+    const dividerColor = useThemeColor({}, 'divider');
+    const warningColor = useThemeColor({}, 'warning');
+    const dangerColor = useThemeColor({}, 'danger');
+    const overlayColor = useThemeColor({}, 'overlay');
 
     const loadLogs = useCallback(async () => {
         if (!employeeId) return;
@@ -105,21 +118,21 @@ export default function DiseaseLogScreen() {
     };
 
     const renderItem = ({ item }: { item: DiseaseLogResponse }) => (
-        <TouchableOpacity style={styles.card} onPress={() => handleCardPress(item)}>
+        <TouchableOpacity style={[styles.card, { backgroundColor: cardBg }]} onPress={() => handleCardPress(item)}>
             <View style={styles.cardHeader}>
-                <Text style={styles.cardTitle}>Báo cáo bệnh #{item._id}</Text>
-                <Text style={styles.cardDate}>
+                <Text style={[styles.cardTitle, { color: textColor }]}>Báo cáo bệnh #{item._id}</Text>
+                <Text style={[styles.cardDate, { color: mutedColor }]}>
                     {new Date(item.dateReport).toLocaleDateString('vi-VN')}
                 </Text>
             </View>
 
             <View style={styles.cardBody}>
-                <Text style={styles.info}>Lô đất: {item.plant_plot?.plot_id || 'N/A'}</Text>
-                <Text style={styles.info}>
+                <Text style={[styles.info, { color: labelColor }]}>Lô đất: {item.plant_plot?.plot_id || 'N/A'}</Text>
+                <Text style={[styles.info, { color: labelColor }]}>
                     Trạng thái cây: {item.plant_plot?.state_plant || 'N/A'}
                 </Text>
 
-                {item.notes && <Text style={styles.notes}>Ghi chú: {item.notes}</Text>}
+                {item.notes && <Text style={[styles.notes, { color: mutedColor }]}>Ghi chú: {item.notes}</Text>}
 
                 {item.image && item.image.length > 0 && (
                     <View style={styles.imageContainer}>
@@ -132,7 +145,7 @@ export default function DiseaseLogScreen() {
                             />
                         ))}
                         {item.image.length > 3 && (
-                            <View style={styles.moreImages}>
+                            <View style={[styles.moreImages, { backgroundColor: overlayColor }]}>
                                 <Text style={styles.moreImagesText}>+{item.image.length - 3}</Text>
                             </View>
                         )}
@@ -144,24 +157,24 @@ export default function DiseaseLogScreen() {
 
     if (loading) {
         return (
-            <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#2196F3" />
+            <View style={[styles.centerContainer, { backgroundColor: bgColor }]}>
+                <ActivityIndicator size="large" color={warningColor} />
             </View>
         );
     }
 
     if (!isAuthenticated || !employeeId) {
         return (
-            <View style={styles.centerContainer}>
-                <Text style={styles.errorText}>Vui lòng đăng nhập để xem báo cáo bệnh</Text>
+            <View style={[styles.centerContainer, { backgroundColor: bgColor }]}>
+                <Text style={[styles.errorText, { color: mutedColor }]}>Vui lòng đăng nhập để xem báo cáo bệnh</Text>
             </View>
         );
     }
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Báo cáo bệnh hại</Text>
+        <SafeAreaView style={[styles.container, { backgroundColor: bgColor }]}>
+            <View style={[styles.header, { backgroundColor: cardBg, borderBottomColor: borderColor }]}>
+                <Text style={[styles.title, { color: textColor }]}>Báo cáo bệnh hại</Text>
             </View>
 
             <FlatList
@@ -172,7 +185,7 @@ export default function DiseaseLogScreen() {
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>Chưa có báo cáo bệnh nào</Text>
+                        <Text style={[styles.emptyText, { color: mutedColor }]}>Chưa có báo cáo bệnh nào</Text>
                     </View>
                 }
             />
@@ -185,22 +198,22 @@ export default function DiseaseLogScreen() {
                 onRequestClose={() => setShowActionModal(false)}
             >
                 <TouchableOpacity
-                    style={styles.modalOverlay}
+                    style={[styles.modalOverlay, { backgroundColor: overlayColor }]}
                     activeOpacity={1}
                     onPress={() => setShowActionModal(false)}
                 >
-                    <View style={styles.modalContent}>
-                        <TouchableOpacity
-                            style={styles.modalButton}
+                    <View style={[styles.modalContent, { backgroundColor: cardBg }]}>
+                        {/* <TouchableOpacity
+                            style={[styles.modalButton, { backgroundColor: dividerColor }]}
                             onPress={handleEdit}
                         >
-                            <Text style={styles.modalButtonText}>Cập nhật</Text>
-                        </TouchableOpacity>
+                            <Text style={[styles.modalButtonText, { color: textColor }]}>Cập nhật</Text>
+                        </TouchableOpacity> */}
                         <TouchableOpacity
-                            style={[styles.modalButton, styles.deleteButton]}
+                            style={[styles.modalButton, { backgroundColor: dangerColor + '20' }]}
                             onPress={handleDelete}
                         >
-                            <Text style={[styles.modalButtonText, styles.deleteButtonText]}>
+                            <Text style={[styles.modalButtonText, { color: dangerColor }]}>
                                 Xóa
                             </Text>
                         </TouchableOpacity>
@@ -214,7 +227,6 @@ export default function DiseaseLogScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
     },
     centerContainer: {
         flex: 1,
@@ -223,9 +235,7 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: 15,
-        backgroundColor: '#fff',
         borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
     },
     title: {
         fontSize: 20,
@@ -235,7 +245,6 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     card: {
-        backgroundColor: '#fff',
         borderRadius: 8,
         padding: 15,
         marginBottom: 10,
@@ -253,23 +262,19 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#333',
     },
     cardDate: {
         fontSize: 14,
-        color: '#666',
     },
     cardBody: {
         marginBottom: 10,
     },
     info: {
         fontSize: 14,
-        color: '#666',
         marginVertical: 2,
     },
     notes: {
         fontSize: 14,
-        color: '#666',
         marginTop: 5,
         fontStyle: 'italic',
     },
@@ -287,7 +292,6 @@ const styles = StyleSheet.create({
         width: 60,
         height: 60,
         borderRadius: 8,
-        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -302,20 +306,16 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-        color: '#999',
     },
     errorText: {
         fontSize: 16,
-        color: '#666',
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     modalContent: {
-        backgroundColor: '#fff',
         borderRadius: 12,
         padding: 20,
         width: '80%',
@@ -325,18 +325,10 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 8,
         marginVertical: 5,
-        backgroundColor: '#f0f0f0',
     },
     modalButtonText: {
         fontSize: 16,
         textAlign: 'center',
-        color: '#333',
         fontWeight: '600',
-    },
-    deleteButton: {
-        backgroundColor: '#ffebee',
-    },
-    deleteButtonText: {
-        color: '#d32f2f',
     },
 });

@@ -7,12 +7,13 @@ import {
     ScrollView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ThemedTextInput from '../components/themed-text-input';
 import { useAuth } from '../contexts/AuthContext';
+import { useThemeColor } from '../hooks/use-theme-color';
 import { careLogService } from '../services/careLog.service';
 import { SupplyOption, supplyService } from '../services/supply.service';
 import { CareLog } from '../types';
@@ -40,6 +41,19 @@ export default function CareLogFormScreen() {
     const [loadingSupplies, setLoadingSupplies] = useState(true);
 
     const [submitting, setSubmitting] = useState(false);
+
+    // Theme colors
+    const bgColor = useThemeColor({}, 'background');
+    const cardBg = useThemeColor({}, 'cardBackground');
+    const inputBg = useThemeColor({}, 'inputBackground');
+    const textColor = useThemeColor({}, 'text');
+    const labelColor = useThemeColor({}, 'label');
+    const mutedColor = useThemeColor({}, 'muted');
+    const borderColor = useThemeColor({}, 'border');
+    const dividerColor = useThemeColor({}, 'divider');
+    const successColor = useThemeColor({}, 'success');
+    const infoColor = useThemeColor({}, 'info');
+    const pickerColor = useThemeColor({}, 'text');
 
     // Load supplies
     useEffect(() => {
@@ -118,21 +132,21 @@ export default function CareLogFormScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.safeArea}>
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: bgColor }]}>
             <ScrollView style={styles.container} contentContainerStyle={styles.content}>
                 <View style={styles.header}>
-                    <Text style={styles.title}>Tạo nhật ký chăm sóc</Text>
-                    <Text style={styles.subtitle}>{plotName}</Text>
+                    <Text style={[styles.title, { color: textColor }]}>Tạo nhật ký chăm sóc</Text>
+                    <Text style={[styles.subtitle, { color: mutedColor }]}>{plotName}</Text>
                 </View>
 
                 {/* Hoạt động */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Hoạt động *</Text>
-                    <View style={styles.pickerContainer}>
+                    <Text style={[styles.label, { color: labelColor }]}>Hoạt động *</Text>
+                    <View style={[styles.pickerContainer, { backgroundColor: inputBg, borderColor: borderColor }]}>
                         <Picker
                             selectedValue={activeType}
                             onValueChange={setActiveType}
-                            style={styles.picker}
+                            style={[styles.picker, { color: pickerColor }]}
                         >
                             <Picker.Item label="Tưới nước" value="tưới nước" />
                             <Picker.Item label="Bón phân" value="bón phân" />
@@ -144,17 +158,17 @@ export default function CareLogFormScreen() {
 
                 {/* Ngày báo cáo */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Ngày báo cáo *</Text>
-                    <Text style={styles.dateText}>
+                    <Text style={[styles.label, { color: labelColor }]}>Ngày báo cáo *</Text>
+                    <Text style={[styles.dateText, { backgroundColor: dividerColor, color: textColor }]}>
                         {dateReport.toLocaleDateString('vi-VN')}
                     </Text>
                 </View>
 
                 {/* Số lượng vật tư */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Số lượng vật tư *</Text>
-                    <TextInput
-                        style={styles.input}
+                    <Text style={[styles.label, { color: labelColor }]}>Số lượng vật tư *</Text>
+                    <ThemedTextInput
+                        style={[styles.input, { backgroundColor: inputBg, borderColor: borderColor }]}
                         placeholder="Nhập số lượng"
                         keyboardType="numeric"
                         value={amount}
@@ -164,9 +178,9 @@ export default function CareLogFormScreen() {
 
                 {/* Đơn vị */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Đơn vị *</Text>
-                    <TextInput
-                        style={styles.input}
+                    <Text style={[styles.label, { color: labelColor }]}>Đơn vị *</Text>
+                    <ThemedTextInput
+                        style={[styles.input, { backgroundColor: inputBg, borderColor: borderColor }]}
                         placeholder="Ví dụ: lít, kg, chai"
                         value={unit}
                         onChangeText={setUnit}
@@ -175,9 +189,9 @@ export default function CareLogFormScreen() {
 
                 {/* Thời tiết */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Thời tiết</Text>
-                    <TextInput
-                        style={styles.input}
+                    <Text style={[styles.label, { color: labelColor }]}>Thời tiết</Text>
+                    <ThemedTextInput
+                        style={[styles.input, { backgroundColor: inputBg, borderColor: borderColor }]}
                         placeholder="Ví dụ: Nắng, Mưa, Âm u"
                         value={weather}
                         onChangeText={setWeather}
@@ -186,29 +200,30 @@ export default function CareLogFormScreen() {
 
                 {/* Vật tư sử dụng */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Vật tư sử dụng (chọn nhiều)</Text>
+                    <Text style={[styles.label, { color: labelColor }]}>Vật tư sử dụng (chọn nhiều)</Text>
                     {loadingSupplies ? (
-                        <ActivityIndicator size="small" color="#2196F3" />
+                        <ActivityIndicator size="small" color={successColor} />
                     ) : (
-                        <View style={styles.checkboxContainer}>
+                        <View style={[styles.checkboxContainer, { backgroundColor: inputBg, borderColor: borderColor }]}>
                             {supplies.map((supply) => (
                                 <TouchableOpacity
                                     key={supply.id}
-                                    style={styles.checkboxItem}
+                                    style={[styles.checkboxItem, { borderBottomColor: dividerColor }]}
                                     onPress={() => toggleSupply(supply.id)}
                                 >
                                     <View
                                         style={[
                                             styles.checkbox,
+                                            { borderColor: infoColor },
                                             selectedSupplyIds.includes(supply.id) &&
-                                            styles.checkboxChecked,
+                                            { backgroundColor: infoColor },
                                         ]}
                                     >
                                         {selectedSupplyIds.includes(supply.id) && (
                                             <Text style={styles.checkboxIcon}>✓</Text>
                                         )}
                                     </View>
-                                    <Text style={styles.checkboxLabel}>{supply.name}</Text>
+                                    <Text style={[styles.checkboxLabel, { color: textColor }]}>{supply.name}</Text>
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -217,9 +232,9 @@ export default function CareLogFormScreen() {
 
                 {/* Ghi chú */}
                 <View style={styles.formGroup}>
-                    <Text style={styles.label}>Ghi chú</Text>
-                    <TextInput
-                        style={[styles.input, styles.textArea]}
+                    <Text style={[styles.label, { color: labelColor }]}>Ghi chú</Text>
+                    <ThemedTextInput
+                        style={[styles.input, styles.textArea, { backgroundColor: inputBg, borderColor: borderColor }]}
                         placeholder="Nhập ghi chú (nếu có)"
                         multiline
                         numberOfLines={4}
@@ -230,7 +245,7 @@ export default function CareLogFormScreen() {
 
                 {/* Submit button */}
                 <TouchableOpacity
-                    style={[styles.submitButton, submitting && styles.submitButtonDisabled]}
+                    style={[styles.submitButton, { backgroundColor: submitting ? mutedColor : successColor }]}
                     onPress={handleSubmit}
                     disabled={submitting}
                 >
@@ -242,11 +257,11 @@ export default function CareLogFormScreen() {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={styles.cancelButton}
+                    style={[styles.cancelButton, { backgroundColor: cardBg, borderColor: borderColor }]}
                     onPress={() => router.back()}
                     disabled={submitting}
                 >
-                    <Text style={styles.cancelButtonText}>Hủy</Text>
+                    <Text style={[styles.cancelButtonText, { color: mutedColor }]}>Hủy</Text>
                 </TouchableOpacity>
             </ScrollView>
         </SafeAreaView>
@@ -256,7 +271,6 @@ export default function CareLogFormScreen() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
     },
     container: {
         flex: 1,
@@ -270,12 +284,10 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#333',
         marginBottom: 5,
     },
     subtitle: {
         fontSize: 16,
-        color: '#666',
     },
     formGroup: {
         marginBottom: 20,
@@ -283,22 +295,17 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 16,
         fontWeight: '600',
-        color: '#333',
         marginBottom: 8,
     },
     pickerContainer: {
-        backgroundColor: '#fff',
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: '#ddd',
     },
     picker: {
         height: 50,
     },
     input: {
-        backgroundColor: '#fff',
         borderWidth: 1,
-        borderColor: '#ddd',
         borderRadius: 8,
         padding: 12,
         fontSize: 16,
@@ -308,38 +315,29 @@ const styles = StyleSheet.create({
         textAlignVertical: 'top',
     },
     dateText: {
-        backgroundColor: '#e8e8e8',
         padding: 12,
         borderRadius: 8,
         fontSize: 16,
-        color: '#333',
     },
     checkboxContainer: {
-        backgroundColor: '#fff',
         borderRadius: 8,
         padding: 10,
         borderWidth: 1,
-        borderColor: '#ddd',
     },
     checkboxItem: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 10,
         borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
     },
     checkbox: {
         width: 24,
         height: 24,
         borderWidth: 2,
-        borderColor: '#2196F3',
         borderRadius: 4,
         marginRight: 10,
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    checkboxChecked: {
-        backgroundColor: '#2196F3',
     },
     checkboxIcon: {
         color: '#fff',
@@ -348,17 +346,12 @@ const styles = StyleSheet.create({
     },
     checkboxLabel: {
         fontSize: 16,
-        color: '#333',
     },
     submitButton: {
-        backgroundColor: '#4CAF50',
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',
         marginBottom: 10,
-    },
-    submitButtonDisabled: {
-        backgroundColor: '#ccc',
     },
     submitButtonText: {
         color: '#fff',
@@ -366,16 +359,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     cancelButton: {
-        backgroundColor: '#fff',
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#ddd',
         marginBottom: 20,
     },
     cancelButtonText: {
-        color: '#666',
         fontSize: 16,
         fontWeight: '600',
     },

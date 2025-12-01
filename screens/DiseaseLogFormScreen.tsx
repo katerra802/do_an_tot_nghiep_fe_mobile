@@ -8,12 +8,13 @@ import {
     ScrollView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
+import ThemedTextInput from '../components/themed-text-input';
 import { useAuth } from '../contexts/AuthContext';
 import { usePlots } from '../contexts/PlotContext';
+import { useThemeColor } from '../hooks/use-theme-color';
 import { diseaseLogService } from '../services/diseaseLog.service';
 import { plantPlotService } from '../services/plantPlot.service';
 import { AIDetectionResponse, DiseaseInfo, PlantPlot } from '../types';
@@ -36,6 +37,19 @@ export default function DiseaseLogFormScreen() {
 
     const [notes, setNotes] = useState('');
     const hasLoadedRef = useRef(false);
+
+    // Theme colors
+    const bgColor = useThemeColor({}, 'background');
+    const cardBg = useThemeColor({}, 'cardBackground');
+    const inputBg = useThemeColor({}, 'inputBackground');
+    const textColor = useThemeColor({}, 'text');
+    const labelColor = useThemeColor({}, 'label');
+    const mutedColor = useThemeColor({}, 'muted');
+    const borderColor = useThemeColor({}, 'border');
+    const dividerColor = useThemeColor({}, 'divider');
+    const warningColor = useThemeColor({}, 'warning');
+    const infoColor = useThemeColor({}, 'info');
+    const pickerColor = useThemeColor({}, 'text');
 
     useEffect(() => {
         // Chỉ load 1 lần khi mount
@@ -163,56 +177,58 @@ export default function DiseaseLogFormScreen() {
     };
 
     return (
-        <ScrollView style={styles.container}>
-            <Text style={styles.title}>Báo cáo bệnh cây</Text>
+        <ScrollView style={[styles.container, { backgroundColor: bgColor }]}>
+            <View style={[styles.titleContainer, { backgroundColor: cardBg }]}>
+                <Text style={[styles.title, { color: textColor }]}>Báo cáo bệnh cây</Text>
+            </View>
 
             {capturedImage && (
-                <View style={styles.imageContainer}>
-                    <Text style={styles.label}>Ảnh phát hiện:</Text>
+                <View style={[styles.imageContainer, { backgroundColor: cardBg }]}>
+                    <Text style={[styles.label, { color: labelColor }]}>Ảnh phát hiện:</Text>
                     <Image source={{ uri: capturedImage }} style={styles.image} resizeMode="contain" />
                 </View>
             )}
 
             {diseaseInfo && (
-                <View style={styles.diseaseInfoContainer}>
-                    <Text style={styles.sectionTitle}>Thông tin bệnh:</Text>
-                    <Text style={styles.diseaseName}>{diseaseInfo.name}</Text>
+                <View style={[styles.diseaseInfoContainer, { backgroundColor: cardBg, borderLeftColor: warningColor }]}>
+                    <Text style={[styles.sectionTitle, { color: textColor }]}>Thông tin bệnh:</Text>
+                    <Text style={[styles.diseaseName, { color: warningColor }]}>{diseaseInfo.name}</Text>
                     {diseaseInfo.scientificName && (
-                        <Text style={styles.diseaseScientific}>({diseaseInfo.scientificName})</Text>
+                        <Text style={[styles.diseaseScientific, { color: mutedColor }]}>({diseaseInfo.scientificName})</Text>
                     )}
-                    <Text style={styles.diseaseCategory}>{diseaseInfo.disease_category_name}</Text>
+                    <Text style={[styles.diseaseCategory, { color: mutedColor, backgroundColor: warningColor + '20' }]}>{diseaseInfo.disease_category_name}</Text>
                     {diseaseInfo.symptoms && (
                         <View style={styles.infoSection}>
-                            <Text style={styles.infoLabel}>Triệu chứng:</Text>
-                            <Text style={styles.infoText}>{diseaseInfo.symptoms}</Text>
+                            <Text style={[styles.infoLabel, { color: labelColor }]}>Triệu chứng:</Text>
+                            <Text style={[styles.infoText, { color: mutedColor }]}>{diseaseInfo.symptoms}</Text>
                         </View>
                     )}
                 </View>
             )}
 
             {detectionData && (
-                <View style={styles.detectionContainer}>
-                    <Text style={styles.label}>Kết quả AI phát hiện:</Text>
+                <View style={[styles.detectionContainer, { backgroundColor: infoColor + '20' }]}>
+                    <Text style={[styles.label, { color: labelColor }]}>Kết quả AI phát hiện:</Text>
                     {(detectionData.predictions || detectionData.detections || []).map((det, index) => (
-                        <Text key={index} style={styles.detectionText}>
+                        <Text key={index} style={[styles.detectionText, { color: infoColor }]}>
                             • {det.class} - Độ tin cậy: {(det.confidence * 100).toFixed(1)}%
                         </Text>
                     ))}
                 </View>
             )}
 
-            <View style={styles.form}>
-                <Text style={styles.sectionTitle}>Thông tin báo cáo</Text>
+            <View style={[styles.form, { backgroundColor: cardBg }]}>
+                <Text style={[styles.sectionTitle, { color: textColor }]}>Thông tin báo cáo</Text>
 
-                <Text style={styles.label}>Chọn lô đất *</Text>
+                <Text style={[styles.label, { color: labelColor }]}>Chọn lô đất *</Text>
                 {plotsLoading ? (
-                    <ActivityIndicator style={{ marginVertical: 10 }} />
+                    <ActivityIndicator style={{ marginVertical: 10 }} color={warningColor} />
                 ) : (
-                    <View style={styles.pickerContainer}>
+                    <View style={[styles.pickerContainer, { backgroundColor: inputBg, borderColor: borderColor }]}>
                         <Picker
                             selectedValue={selectedPlotId}
                             onValueChange={handlePlotSelect}
-                            style={styles.picker}
+                            style={[styles.picker, { color: pickerColor }]}
                         >
                             <Picker.Item label="-- Chọn lô đất --" value={undefined} />
                             {plots.map((plot) => (
@@ -228,15 +244,15 @@ export default function DiseaseLogFormScreen() {
 
                 {selectedPlotId && (
                     <>
-                        <Text style={styles.label}>Chọn cây trồng bị bệnh *</Text>
+                        <Text style={[styles.label, { color: labelColor }]}>Chọn cây trồng bị bệnh *</Text>
                         {loadingPlantPlots ? (
-                            <ActivityIndicator style={{ marginVertical: 10 }} />
+                            <ActivityIndicator style={{ marginVertical: 10 }} color={warningColor} />
                         ) : plantPlots.length > 0 ? (
-                            <View style={styles.pickerContainer}>
+                            <View style={[styles.pickerContainer, { backgroundColor: inputBg, borderColor: borderColor }]}>
                                 <Picker
                                     selectedValue={selectedPlantPlotId}
                                     onValueChange={setSelectedPlantPlotId}
-                                    style={styles.picker}
+                                    style={[styles.picker, { color: pickerColor }]}
                                 >
                                     <Picker.Item label="-- Chọn cây trồng --" value={undefined} />
                                     {plantPlots.map((plantPlot) => (
@@ -249,21 +265,21 @@ export default function DiseaseLogFormScreen() {
                                 </Picker>
                             </View>
                         ) : (
-                            <Text style={styles.warningText}>Không có cây trồng nào trong lô này</Text>
+                            <Text style={[styles.warningText, { color: warningColor }]}>Không có cây trồng nào trong lô này</Text>
                         )}
                     </>
                 )}
 
-                <Text style={styles.label}>Ngày phát hiện</Text>
-                <TextInput
-                    style={styles.input}
+                <Text style={[styles.label, { color: labelColor }]}>Ngày phát hiện</Text>
+                <ThemedTextInput
+                    style={[styles.input, { backgroundColor: dividerColor, borderColor: borderColor }]}
                     value={new Date().toLocaleDateString('vi-VN')}
                     editable={false}
                 />
 
-                <Text style={styles.label}>Ghi chú</Text>
-                <TextInput
-                    style={[styles.input, styles.textArea]}
+                <Text style={[styles.label, { color: labelColor }]}>Ghi chú</Text>
+                <ThemedTextInput
+                    style={[styles.input, styles.textArea, { backgroundColor: inputBg, borderColor: borderColor }]}
                     value={notes}
                     onChangeText={setNotes}
                     placeholder="Nhập ghi chú về tình trạng bệnh, vị trí phát hiện..."
@@ -272,7 +288,7 @@ export default function DiseaseLogFormScreen() {
                 />
 
                 <TouchableOpacity
-                    style={[styles.submitButton, loading && styles.buttonDisabled]}
+                    style={[styles.submitButton, { backgroundColor: loading ? mutedColor : warningColor }]}
                     onPress={handleSubmit}
                     disabled={loading}
                 >
@@ -283,8 +299,8 @@ export default function DiseaseLogFormScreen() {
                     )}
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.cancelButton} onPress={() => router.back()}>
-                    <Text style={styles.cancelButtonText}>Hủy</Text>
+                <TouchableOpacity style={[styles.cancelButton, { backgroundColor: cardBg, borderColor: borderColor }]} onPress={() => router.back()}>
+                    <Text style={[styles.cancelButtonText, { color: mutedColor }]}>Hủy</Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>
@@ -294,16 +310,15 @@ export default function DiseaseLogFormScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+    },
+    titleContainer: {
+        padding: 20,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        padding: 20,
-        backgroundColor: '#fff',
     },
     imageContainer: {
-        backgroundColor: '#fff',
         padding: 15,
         marginTop: 10,
     },
@@ -314,17 +329,14 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     detectionContainer: {
-        backgroundColor: '#e3f2fd',
         padding: 15,
         marginTop: 10,
     },
     detectionText: {
         fontSize: 14,
-        color: '#1976d2',
         marginVertical: 2,
     },
     form: {
-        backgroundColor: '#fff',
         padding: 20,
         marginTop: 10,
     },
@@ -333,22 +345,18 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         marginTop: 15,
         marginBottom: 5,
-        color: '#333',
     },
     input: {
         borderWidth: 1,
-        borderColor: '#ddd',
         borderRadius: 8,
         padding: 12,
         fontSize: 16,
-        backgroundColor: '#fff',
     },
     textArea: {
         height: 100,
         textAlignVertical: 'top',
     },
     submitButton: {
-        backgroundColor: '#4CAF50',
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',
@@ -360,53 +368,40 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     cancelButton: {
-        backgroundColor: '#f5f5f5',
         padding: 15,
         borderRadius: 8,
         alignItems: 'center',
         marginTop: 10,
         borderWidth: 1,
-        borderColor: '#ddd',
     },
     cancelButtonText: {
-        color: '#666',
         fontSize: 16,
         fontWeight: 'bold',
     },
-    buttonDisabled: {
-        backgroundColor: '#ccc',
-    },
     diseaseInfoContainer: {
-        backgroundColor: '#fff',
         padding: 15,
         marginTop: 10,
         borderLeftWidth: 4,
-        borderLeftColor: '#4CAF50',
     },
     sectionTitle: {
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 10,
-        color: '#333',
     },
     diseaseName: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#4CAF50',
     },
     diseaseScientific: {
         fontSize: 14,
         fontStyle: 'italic',
-        color: '#666',
         marginTop: 2,
     },
     diseaseCategory: {
         fontSize: 14,
-        color: '#666',
         marginTop: 4,
         paddingVertical: 4,
         paddingHorizontal: 8,
-        backgroundColor: '#e8f5e9',
         alignSelf: 'flex-start',
         borderRadius: 4,
     },
@@ -416,19 +411,15 @@ const styles = StyleSheet.create({
     infoLabel: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#333',
         marginBottom: 4,
     },
     infoText: {
         fontSize: 14,
-        color: '#666',
         lineHeight: 20,
     },
     pickerContainer: {
         borderWidth: 1,
-        borderColor: '#ddd',
         borderRadius: 8,
-        backgroundColor: '#fff',
         marginBottom: 10,
     },
     picker: {
@@ -436,7 +427,6 @@ const styles = StyleSheet.create({
     },
     warningText: {
         fontSize: 14,
-        color: '#ff9800',
         fontStyle: 'italic',
         marginVertical: 10,
     },

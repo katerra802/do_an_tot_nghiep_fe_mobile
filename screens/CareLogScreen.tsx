@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
+import { useThemeColor } from '../hooks/use-theme-color';
 import { careLogService } from '../services/careLog.service';
 import { CareLog, PlotOption } from '../types';
 
@@ -26,6 +27,18 @@ export default function CareLogScreen() {
     const [showPlots, setShowPlots] = useState(false);
     const [showActionModal, setShowActionModal] = useState(false);
     const [selectedLog, setSelectedLog] = useState<CareLog | null>(null);
+
+    // Theme colors
+    const bgColor = useThemeColor({}, 'background');
+    const cardBg = useThemeColor({}, 'cardBackground');
+    const textColor = useThemeColor({}, 'text');
+    const mutedColor = useThemeColor({}, 'muted');
+    const labelColor = useThemeColor({}, 'label');
+    const borderColor = useThemeColor({}, 'border');
+    const dividerColor = useThemeColor({}, 'divider');
+    const successColor = useThemeColor({}, 'success');
+    const dangerColor = useThemeColor({}, 'danger');
+    const overlayColor = useThemeColor({}, 'overlay');
 
     const loadLogs = useCallback(async () => {
         if (!employeeId) return;
@@ -156,33 +169,33 @@ export default function CareLogScreen() {
 
     const renderItem = ({ item }: { item: CareLog }) => (
         <TouchableOpacity onPress={() => handleCardPress(item)}>
-            <View style={styles.card}>
+            <View style={[styles.card, { backgroundColor: cardBg }]}>
                 <View style={styles.cardHeader}>
-                    <Text style={styles.cardTitle}>Lô đất: {item.plot_id}</Text>
-                    <Text style={styles.cardDate}>
+                    <Text style={[styles.cardTitle, { color: textColor }]}>Lô đất: {item.plot_id}</Text>
+                    <Text style={[styles.cardDate, { color: mutedColor }]}>
                         {new Date(item.dateReport).toLocaleDateString('vi-VN')}
                     </Text>
                 </View>
 
                 <View style={styles.cardBody}>
-                    <Text style={styles.label}>Hoạt động:</Text>
-                    {item.active.map((act, index) => (
-                        <Text key={index} style={styles.activity}>
-                            • {act}
+                    <Text style={[styles.label, { color: labelColor }]}>Hoạt động:</Text>
+                    {item.active && Array.isArray(item.active) && item.active.map((act, index) => (
+                        <Text key={index} style={[styles.activity, { color: textColor }]}>
+                            • {act || ''}
                         </Text>
                     ))}
 
                     {item.weather && (
-                        <Text style={styles.info}>Thời tiết: {item.weather}</Text>
+                        <Text style={[styles.info, { color: mutedColor }]}>Thời tiết: {item.weather}</Text>
                     )}
 
                     {item.amount && item.unit && (
-                        <Text style={styles.info}>
+                        <Text style={[styles.info, { color: mutedColor }]}>
                             Vật tư: {item.amount} {item.unit}
                         </Text>
                     )}
 
-                    {item.notes && <Text style={styles.notes}>Ghi chú: {item.notes}</Text>}
+                    {item.notes && <Text style={[styles.notes, { color: mutedColor }]}>Ghi chú: {item.notes}</Text>}
                 </View>
             </View>
         </TouchableOpacity>
@@ -190,16 +203,16 @@ export default function CareLogScreen() {
 
     if (loading) {
         return (
-            <View style={styles.centerContainer}>
-                <ActivityIndicator size="large" color="#2196F3" />
+            <View style={[styles.centerContainer, { backgroundColor: bgColor }]}>
+                <ActivityIndicator size="large" color={successColor} />
             </View>
         );
     }
 
     if (!isAuthenticated || !employeeId) {
         return (
-            <View style={styles.centerContainer}>
-                <Text style={styles.errorText}>Vui lòng đăng nhập để xem nhật ký</Text>
+            <View style={[styles.centerContainer, { backgroundColor: bgColor }]}>
+                <Text style={[styles.errorText, { color: mutedColor }]}>Vui lòng đăng nhập để xem nhật ký</Text>
             </View>
         );
     }
@@ -207,14 +220,14 @@ export default function CareLogScreen() {
     // Plot selection modal
     if (showPlots) {
         return (
-            <SafeAreaView style={styles.container}>
-                <View style={styles.header}>
-                    <Text style={styles.title}>Chọn lô đất</Text>
+            <SafeAreaView style={[styles.container, { backgroundColor: bgColor }]}>
+                <View style={[styles.header, { backgroundColor: cardBg, borderBottomColor: borderColor }]}>
+                    <Text style={[styles.title, { color: textColor }]}>Chọn lô đất</Text>
                     <TouchableOpacity
                         style={styles.closeButton}
                         onPress={() => setShowPlots(false)}
                     >
-                        <Text style={styles.closeButtonText}>✕</Text>
+                        <Text style={[styles.closeButtonText, { color: mutedColor }]}>✕</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -222,15 +235,15 @@ export default function CareLogScreen() {
                     data={plots}
                     renderItem={({ item }) => (
                         <TouchableOpacity
-                            style={styles.plotCard}
+                            style={[styles.plotCard, { backgroundColor: cardBg, borderLeftColor: successColor }]}
                             onPress={() => handlePlotSelect(item)}
                         >
-                            <Text style={styles.plotName}>{item.name}</Text>
+                            <Text style={[styles.plotName, { color: textColor }]}>{item.name}</Text>
                             <View style={styles.plotInfo}>
-                                <Text style={styles.plotDetail}>
+                                <Text style={[styles.plotDetail, { color: mutedColor }]}>
                                     Diện tích: {item.acreage} m²
                                 </Text>
-                                <Text style={styles.plotDetail}>
+                                <Text style={[styles.plotDetail, { color: mutedColor }]}>
                                     Số cây: {item.numberOfTrees}
                                 </Text>
                             </View>
@@ -240,7 +253,7 @@ export default function CareLogScreen() {
                     contentContainerStyle={styles.list}
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Text style={styles.emptyText}>
+                            <Text style={[styles.emptyText, { color: mutedColor }]}>
                                 Không có lô đất nào cần chăm sóc
                             </Text>
                         </View>
@@ -251,11 +264,11 @@ export default function CareLogScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Nhật ký chăm sóc</Text>
+        <SafeAreaView style={[styles.container, { backgroundColor: bgColor }]}>
+            <View style={[styles.header, { backgroundColor: cardBg, borderBottomColor: borderColor }]}>
+                <Text style={[styles.title, { color: textColor }]}>Nhật ký chăm sóc</Text>
                 <TouchableOpacity
-                    style={styles.addButton}
+                    style={[styles.addButton, { backgroundColor: successColor }]}
                     onPress={handleAddNew}
                 >
                     <Text style={styles.addButtonText}>+ Thêm mới</Text>
@@ -270,7 +283,7 @@ export default function CareLogScreen() {
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>Chưa có nhật ký nào</Text>
+                        <Text style={[styles.emptyText, { color: mutedColor }]}>Chưa có nhật ký nào</Text>
                     </View>
                 }
             />
@@ -282,22 +295,22 @@ export default function CareLogScreen() {
                 onRequestClose={() => setShowActionModal(false)}
             >
                 <TouchableOpacity
-                    style={styles.modalOverlay}
+                    style={[styles.modalOverlay, { backgroundColor: overlayColor }]}
                     activeOpacity={1}
                     onPress={() => setShowActionModal(false)}
                 >
-                    <View style={styles.modalContent}>
+                    <View style={[styles.modalContent, { backgroundColor: cardBg }]}>
                         <TouchableOpacity
-                            style={styles.modalButton}
+                            style={[styles.modalButton, { backgroundColor: dividerColor }]}
                             onPress={handleEdit}
                         >
-                            <Text style={styles.modalButtonText}>Cập nhật</Text>
+                            <Text style={[styles.modalButtonText, { color: textColor }]}>Cập nhật</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                            style={[styles.modalButton, styles.deleteButton]}
+                            style={[styles.modalButton, { backgroundColor: dangerColor + '20' }]}
                             onPress={handleDelete}
                         >
-                            <Text style={[styles.modalButtonText, styles.deleteButtonText]}>
+                            <Text style={[styles.modalButtonText, { color: dangerColor }]}>
                                 Xóa
                             </Text>
                         </TouchableOpacity>
@@ -311,7 +324,6 @@ export default function CareLogScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
     },
     centerContainer: {
         flex: 1,
@@ -323,16 +335,13 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: 15,
-        backgroundColor: '#fff',
         borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
     },
     title: {
         fontSize: 20,
         fontWeight: 'bold',
     },
     addButton: {
-        backgroundColor: '#4CAF50',
         paddingHorizontal: 15,
         paddingVertical: 8,
         borderRadius: 8,
@@ -345,7 +354,6 @@ const styles = StyleSheet.create({
         padding: 10,
     },
     card: {
-        backgroundColor: '#fff',
         borderRadius: 8,
         padding: 15,
         marginBottom: 10,
@@ -363,11 +371,9 @@ const styles = StyleSheet.create({
     cardTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#333',
     },
     cardDate: {
         fontSize: 14,
-        color: '#666',
     },
     cardBody: {
         marginBottom: 10,
@@ -375,28 +381,23 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 14,
         fontWeight: '600',
-        color: '#555',
         marginBottom: 5,
     },
     activity: {
         fontSize: 14,
-        color: '#333',
         marginLeft: 10,
         marginVertical: 2,
     },
     info: {
         fontSize: 14,
-        color: '#666',
         marginTop: 5,
     },
     notes: {
         fontSize: 14,
-        color: '#666',
         marginTop: 5,
         fontStyle: 'italic',
     },
     plotCard: {
-        backgroundColor: '#fff',
         borderRadius: 12,
         padding: 20,
         marginBottom: 15,
@@ -406,12 +407,10 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 3,
         borderLeftWidth: 4,
-        borderLeftColor: '#4CAF50',
     },
     plotName: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#333',
         marginBottom: 10,
     },
     plotInfo: {
@@ -420,14 +419,12 @@ const styles = StyleSheet.create({
     },
     plotDetail: {
         fontSize: 14,
-        color: '#666',
     },
     closeButton: {
         padding: 5,
     },
     closeButtonText: {
         fontSize: 24,
-        color: '#666',
         fontWeight: 'bold',
     },
     emptyContainer: {
@@ -436,20 +433,16 @@ const styles = StyleSheet.create({
     },
     emptyText: {
         fontSize: 16,
-        color: '#999',
     },
     errorText: {
         fontSize: 16,
-        color: '#666',
     },
     modalOverlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     modalContent: {
-        backgroundColor: '#fff',
         borderRadius: 12,
         padding: 20,
         width: '80%',
@@ -459,18 +452,10 @@ const styles = StyleSheet.create({
         padding: 15,
         borderRadius: 8,
         marginVertical: 5,
-        backgroundColor: '#f0f0f0',
     },
     modalButtonText: {
         fontSize: 16,
         textAlign: 'center',
-        color: '#333',
         fontWeight: '600',
-    },
-    deleteButton: {
-        backgroundColor: '#ffebee',
-    },
-    deleteButtonText: {
-        color: '#d32f2f',
     },
 });

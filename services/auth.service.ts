@@ -172,4 +172,101 @@ export const authService = {
             console.warn('initializeAuth: failed to clear storage', error);
         }
     },
+
+    /**
+     * Lấy user ID từ username (API 1)
+     */
+    getUserByUsername: async (username: string): Promise<ApiResponse<number>> => {
+        try {
+            const response = await backendApi.get<{ success: boolean; message: string; data: number }>(
+                `/auth/username/${username}`
+            );
+
+            if (response.data.success) {
+                return {
+                    success: true,
+                    data: response.data.data,
+                    message: response.data.message,
+                };
+            }
+
+            return {
+                success: false,
+                error: 'Không tìm thấy người dùng',
+            };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Không tìm thấy người dùng với tên đăng nhập này',
+            };
+        }
+    },
+
+    /**
+     * Reset password (API 2)
+     */
+    resetPassword: async (userId: number, email: string): Promise<ApiResponse<void>> => {
+        try {
+            const response = await backendApi.post<{ success: boolean; message: string }>(
+                `/auth/${userId}/reset-password`,
+                { email }
+            );
+
+            if (response.data.success) {
+                return {
+                    success: true,
+                    message: response.data.message,
+                };
+            }
+
+            return {
+                success: false,
+                error: response.data.message || 'Không thể đặt lại mật khẩu',
+            };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Đã xảy ra lỗi khi đặt lại mật khẩu',
+            };
+        }
+    },
+
+    /**
+     * Đổi mật khẩu
+     */
+    changePassword: async (
+        userId: number,
+        oldPassword: string,
+        newPassword: string,
+        confirmNewPassword: string
+    ): Promise<ApiResponse<void>> => {
+        try {
+            const response = await backendApi.post<{ status: string; message: string }>(
+                '/auth/change-password',
+                {
+                    userId,
+                    oldPassword,
+                    newPassword,
+                    confirmNewPassword,
+                }
+            );
+
+            if (response.data.status === 'thành công') {
+                return {
+                    success: true,
+                    message: response.data.message,
+                };
+            }
+
+            return {
+                success: false,
+                error: response.data.message || 'Không thể đổi mật khẩu',
+            };
+        } catch (error: any) {
+            return {
+                success: false,
+                error: error.response?.data?.message || 'Đã xảy ra lỗi khi đổi mật khẩu',
+            };
+        }
+    },
 };
