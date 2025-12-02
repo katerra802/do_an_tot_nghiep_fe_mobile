@@ -51,8 +51,8 @@ export default function CareLogScreen() {
 
         try {
             const result = await careLogService.getByEmployee(employeeId);
-            if (result.success && result.data) {
-                setLogs(result.data);
+            if (result.success) {
+                setLogs(result.data || []);
             } else {
                 Alert.alert('Thông báo', result.error || 'Không thể tải danh sách nhật ký');
             }

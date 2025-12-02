@@ -51,10 +51,13 @@ export default function HarvestLogScreen() {
 
         try {
             const result = await harvestLogService.getByEmployee(employeeId);
-            if (result.success && result.data) {
-                setLogs(result.data);
+            console.log('HarvestLog API Response:', JSON.stringify(result, null, 2));
+            if (result.success) {
+                console.log('Setting logs to:', result.data || []);
+                setLogs(result.data || []);
             } else {
-                Alert.alert('Thông báo', result.error || 'Không thể tải danh sách nhật ký');
+                // Khi không tìm thấy log nào, set về empty array
+                setLogs([]);
             }
         } catch {
             Alert.alert('Thông báo', 'Có lỗi xảy ra khi tải dữ liệu');
@@ -160,6 +163,8 @@ export default function HarvestLogScreen() {
                         try {
                             const result = await harvestLogService.delete(logId!);
                             if (result.success) {
+                                // Clear logs immediately để force UI update
+                                setLogs([]);
                                 Alert.alert('Thành công', 'Xóa nhật ký thành công');
                                 loadLogs();
                             } else {

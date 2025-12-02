@@ -42,10 +42,13 @@ export default function DiseaseLogScreen() {
 
         try {
             const result = await diseaseLogService.getByEmployee(employeeId);
-            if (result.success && result.data) {
-                setLogs(result.data);
+            console.log('DiseaseLog API Response:', JSON.stringify(result, null, 2));
+            if (result.success) {
+                console.log('Setting logs to:', result.data || []);
+                setLogs(result.data || []);
             } else {
-                Alert.alert('Thông báo', result.error || 'Không thể tải danh sách báo cáo bệnh');
+                // Khi không tìm thấy log nào, set về empty array
+                setLogs([]);
             }
         } catch {
             Alert.alert('Thông báo', 'Có lỗi xảy ra khi tải dữ liệu');
@@ -91,6 +94,8 @@ export default function DiseaseLogScreen() {
                         try {
                             const result = await diseaseLogService.delete(selectedLog._id);
                             if (result.success) {
+                                // Clear logs immediately để force UI update
+                                setLogs([]);
                                 Alert.alert('Thành công', 'Xóa báo cáo bệnh thành công');
                                 loadLogs();
                             } else {

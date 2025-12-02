@@ -51,10 +51,11 @@ export default function DevelopmentLogScreen() {
 
         try {
             const result = await developmentLogService.getByEmployee(employeeId);
-            if (result.success && result.data) {
-                setLogs(result.data);
+            if (result.success) {
+                setLogs(result.data || []);
             } else {
-                Alert.alert('Thông báo', result.error || 'Không thể tải danh sách nhật ký');
+                // Khi không tìm thấy log nào, set về empty array
+                setLogs([]);
             }
         } catch {
             Alert.alert('Thông báo', 'Có lỗi xảy ra khi tải dữ liệu');
@@ -157,6 +158,8 @@ export default function DevelopmentLogScreen() {
                         try {
                             const result = await developmentLogService.delete(logId!);
                             if (result.success) {
+                                // Clear logs immediately để force UI update
+                                setLogs([]);
                                 Alert.alert('Thành công', 'Xóa nhật ký thành công');
                                 loadLogs();
                             } else {
