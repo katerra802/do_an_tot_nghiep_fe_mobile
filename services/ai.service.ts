@@ -54,7 +54,7 @@ export const aiService = {
             try {
                 const data = JSON.parse(event.data);
                 onMessage(data);
-            } catch (error) {
+            } catch {
                 Alert.alert('Lỗi', 'Dữ liệu nhận từ AI không hợp lệ');
             }
         };
@@ -102,7 +102,7 @@ export const aiService = {
         try {
             const response = await aiApi.get('/');
             return response.data.status === 'ok';
-        } catch (error) {
+        } catch {
             Alert.alert('Lỗi', 'Kiểm tra trạng thái AI service thất bại');
             return false;
         }

@@ -168,7 +168,7 @@ export const authService = {
 
             // Ensure axios doesn't hold an old Authorization header
             delete backendApi.defaults.headers.common['Authorization'];
-        } catch (error) {
+        } catch {
             // swallow — initialization should not crash app
             Alert.alert('Lỗi', 'Không thể khởi tạo trạng thái xác thực');
         }

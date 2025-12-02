@@ -1,4 +1,4 @@
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
     ActivityIndicator,
@@ -19,7 +19,6 @@ import { diseaseLogService } from '../services/diseaseLog.service';
 import { DiseaseLogResponse } from '../types';
 
 export default function DiseaseLogScreen() {
-    const router = useRouter();
     const { employeeId, isAuthenticated } = useAuth();
     const [logs, setLogs] = useState<DiseaseLogResponse[]>([]);
     const [loading, setLoading] = useState(true);
@@ -74,17 +73,7 @@ export default function DiseaseLogScreen() {
         setShowActionModal(true);
     };
 
-    const handleEdit = () => {
-        setShowActionModal(false);
-        if (selectedLog) {
-            router.push({
-                pathname: '/disease-log-edit',
-                params: {
-                    logId: selectedLog._id.toString(),
-                },
-            });
-        }
-    };
+
 
     const handleDelete = async () => {
         if (!selectedLog) return;

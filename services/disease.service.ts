@@ -26,7 +26,7 @@ export const diseaseService = {
             }
 
             return null;
-        } catch (error: any) {
+        } catch {
             Alert.alert('Lỗi', `Không thể lấy thông tin bệnh với label "${label}"`);
             return null;
         }

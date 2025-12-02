@@ -26,7 +26,7 @@ export const plantPlotService = {
             }
 
             return null;
-        } catch (error: any) {
+        } catch {
             Alert.alert('Lỗi', 'Không thể lấy danh sách cây trồng trong lô đất');
             return null;
         }

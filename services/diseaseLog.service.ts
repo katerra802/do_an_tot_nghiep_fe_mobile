@@ -75,7 +75,7 @@ export const diseaseLogService = {
             }
 
             return null;
-        } catch (error: any) {
+        } catch {
             Alert.alert('Lỗi', 'Không thể tải ảnh lên');
             return null;
         }
