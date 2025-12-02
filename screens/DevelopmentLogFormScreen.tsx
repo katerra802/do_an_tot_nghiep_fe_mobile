@@ -106,9 +106,10 @@ export default function DevelopmentLogFormScreen() {
                             style={[styles.picker, { color: pickerColor }]}
                         >
                             <Picker.Item label="Nảy mầm" value="nảy mầm" />
-                            <Picker.Item label="Sinh trưởng" value="sinh trưởng" />
+                            <Picker.Item label="Sinh trưởng thân lá" value="sinh trưởng thân lá" />
                             <Picker.Item label="Ra hoa" value="ra hoa" />
-                            <Picker.Item label="Kết trái" value="kết trái" />
+                            <Picker.Item label="Đậu trái" value="đậu trái" />
+                            <Picker.Item label="Phát triển trái" value="phát triển trái" />
                             <Picker.Item label="Thu hoạch" value="thu hoạch" />
                         </Picker>
                     </View>

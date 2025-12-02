@@ -131,9 +131,11 @@ export default function DevelopmentLogEditScreen() {
                             style={[styles.picker, { color: pickerColor }]}
                         >
                             <Picker.Item label="Nảy mầm" value="nảy mầm" />
-                            <Picker.Item label="Khỏe mạnh" value="khỏe mạnh" />
+                            <Picker.Item label="Sinh trưởng thân lá" value="sinh trưởng thân lá" />
                             <Picker.Item label="Ra hoa" value="ra hoa" />
-                            <Picker.Item label="Kết quả" value="kết quả" />
+                            <Picker.Item label="Đậu trái" value="đậu trái" />
+                            <Picker.Item label="Phát triển trái" value="phát triển trái" />
+                            <Picker.Item label="Thu hoạch" value="thu hoạch" />
                         </Picker>
                     </View>
                 </View>

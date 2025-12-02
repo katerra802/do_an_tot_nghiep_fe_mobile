@@ -71,13 +71,7 @@ export default function CareLogFormScreen() {
         setLoadingSupplies(false);
     };
 
-    const toggleSupply = (supplyId: number) => {
-        setSelectedSupplyIds((prev) =>
-            prev.includes(supplyId)
-                ? prev.filter((id) => id !== supplyId)
-                : [...prev, supplyId]
-        );
-    };
+
 
     const handleSubmit = async () => {
         // Validation
@@ -88,6 +82,11 @@ export default function CareLogFormScreen() {
 
         if (!employeeId) {
             Alert.alert('Lỗi', 'Không có thông tin nhân viên');
+            return;
+        }
+
+        if (selectedSupplyIds.length === 0) {
+            Alert.alert('Lỗi', 'Vui lòng chọn vật tư sử dụng');
             return;
         }
 
@@ -200,7 +199,7 @@ export default function CareLogFormScreen() {
 
                 {/* Vật tư sử dụng */}
                 <View style={styles.formGroup}>
-                    <Text style={[styles.label, { color: labelColor }]}>Vật tư sử dụng (chọn nhiều)</Text>
+                    <Text style={[styles.label, { color: labelColor }]}>Vật tư sử dụng (chọn 1)</Text>
                     {loadingSupplies ? (
                         <ActivityIndicator size="small" color={successColor} />
                     ) : (
@@ -209,18 +208,18 @@ export default function CareLogFormScreen() {
                                 <TouchableOpacity
                                     key={supply.id}
                                     style={[styles.checkboxItem, { borderBottomColor: dividerColor }]}
-                                    onPress={() => toggleSupply(supply.id)}
+                                    onPress={() => setSelectedSupplyIds([supply.id])}
                                 >
                                     <View
                                         style={[
-                                            styles.checkbox,
+                                            styles.radio,
                                             { borderColor: infoColor },
                                             selectedSupplyIds.includes(supply.id) &&
-                                            { backgroundColor: infoColor },
+                                            { borderColor: infoColor },
                                         ]}
                                     >
                                         {selectedSupplyIds.includes(supply.id) && (
-                                            <Text style={styles.checkboxIcon}>✓</Text>
+                                            <View style={[styles.radioInner, { backgroundColor: infoColor }]} />
                                         )}
                                     </View>
                                     <Text style={[styles.checkboxLabel, { color: textColor }]}>{supply.name}</Text>
@@ -338,6 +337,20 @@ const styles = StyleSheet.create({
         marginRight: 10,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    radio: {
+        width: 24,
+        height: 24,
+        borderWidth: 2,
+        borderRadius: 12,
+        marginRight: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    radioInner: {
+        width: 12,
+        height: 12,
+        borderRadius: 6,
     },
     checkboxIcon: {
         color: '#fff',

@@ -65,7 +65,6 @@ export const aiService = {
         };
 
         ws.onclose = (event) => {
-            Alert.alert('Thông báo', `Kết nối WebSocket đã đóng. Mã: ${event.code}, Lý do: ${event.reason}`);
             if (onClose) onClose(event);
         };
 

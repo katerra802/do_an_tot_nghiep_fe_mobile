@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
+import { usePlots } from '../contexts/PlotContext';
 import { useThemeColor } from '../hooks/use-theme-color';
 import { developmentLogService } from '../services/developmentLog.service';
 import { plotService } from '../services/plot.service';
@@ -21,8 +22,12 @@ import { DevelopmentLog, PlotOption } from '../types';
 export default function DevelopmentLogScreen() {
     const router = useRouter();
     const { employeeId, isAuthenticated } = useAuth();
+    const { plots: contextPlots } = usePlots();
     const [logs, setLogs] = useState<DevelopmentLog[]>([]);
     const [plots, setPlots] = useState<PlotOption[]>([]);
+
+    // Sử dụng contextPlots nếu có, nếu không fallback về plots local
+    const allPlots = contextPlots.length > 0 ? contextPlots : plots;
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [showPlots, setShowPlots] = useState(false);
@@ -49,10 +54,10 @@ export default function DevelopmentLogScreen() {
             if (result.success && result.data) {
                 setLogs(result.data);
             } else {
-                Alert.alert('Lỗi', result.error || 'Không thể tải danh sách nhật ký');
+                Alert.alert('Thông báo', result.error || 'Không thể tải danh sách nhật ký');
             }
         } catch {
-            Alert.alert('Lỗi', 'Có lỗi xảy ra khi tải dữ liệu');
+            Alert.alert('Thông báo', 'Có lỗi xảy ra khi tải dữ liệu');
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -166,26 +171,30 @@ export default function DevelopmentLogScreen() {
         );
     };
 
-    const renderItem = ({ item }: { item: DevelopmentLog }) => (
-        <TouchableOpacity onPress={() => handleCardPress(item)}>
-            <View style={[styles.card, { backgroundColor: cardBg }]}>
-                <View style={styles.cardHeader}>
-                    <Text style={[styles.cardTitle, { color: textColor }]}>Lô đất: {item.plot_id}</Text>
-                    <Text style={[styles.cardDate, { color: mutedColor }]}>
-                        {new Date(item.dateReport).toLocaleDateString('vi-VN')}
-                    </Text>
-                </View>
+    const renderItem = ({ item }: { item: DevelopmentLog }) => {
+        const plotName = allPlots.find(p => String(p.id) === String(item.plot_id))?.name || 'Không xác định';
 
-                <View style={styles.cardBody}>
-                    <Text style={[styles.phase, { color: labelColor }]}>
-                        Giai đoạn: <Text style={[styles.phaseValue, { color: successColor }]}>{item.phaseDevelopment}</Text>
-                    </Text>
+        return (
+            <TouchableOpacity onPress={() => handleCardPress(item)}>
+                <View style={[styles.card, { backgroundColor: cardBg }]}>
+                    <View style={styles.cardHeader}>
+                        <Text style={[styles.cardTitle, { color: textColor }]}>Lô đất: #{item.plot_id} - {plotName}</Text>
+                        <Text style={[styles.cardDate, { color: mutedColor }]}>
+                            {new Date(item.dateReport).toLocaleDateString('vi-VN')}
+                        </Text>
+                    </View>
 
-                    {item.notes && <Text style={[styles.notes, { color: mutedColor }]}>Ghi chú: {item.notes}</Text>}
+                    <View style={styles.cardBody}>
+                        <Text style={[styles.phase, { color: labelColor }]}>
+                            Giai đoạn: <Text style={[styles.phaseValue, { color: successColor }]}>{item.phaseDevelopment}</Text>
+                        </Text>
+
+                        {item.notes && <Text style={[styles.notes, { color: mutedColor }]}>Ghi chú: {item.notes}</Text>}
+                    </View>
                 </View>
-            </View>
-        </TouchableOpacity>
-    );
+            </TouchableOpacity>
+        );
+    };
 
     if (loading) {
         return (

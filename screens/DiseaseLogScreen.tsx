@@ -45,10 +45,10 @@ export default function DiseaseLogScreen() {
             if (result.success && result.data) {
                 setLogs(result.data);
             } else {
-                Alert.alert('Lỗi', result.error || 'Không thể tải danh sách báo cáo bệnh');
+                Alert.alert('Thông báo', result.error || 'Không thể tải danh sách báo cáo bệnh');
             }
         } catch {
-            Alert.alert('Lỗi', 'Có lỗi xảy ra khi tải dữ liệu');
+            Alert.alert('Thông báo', 'Có lỗi xảy ra khi tải dữ liệu');
         } finally {
             setLoading(false);
             setRefreshing(false);

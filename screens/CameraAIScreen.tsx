@@ -31,6 +31,8 @@ export default function CameraAIScreen() {
     const isStreamingRef = useRef<boolean>(false);
     const frameCountRef = useRef<number>(0);
     const lastFrameTimeRef = useRef<number>(0);
+    const isMountedRef = useRef<boolean>(true);
+    const isIntentionalCloseRef = useRef<boolean>(false);
     const recordingDotOpacity = useRef(new Animated.Value(1)).current;
 
     // Animation cho recording dot
@@ -57,7 +59,9 @@ export default function CameraAIScreen() {
 
     // Cleanup khi unmount
     useEffect(() => {
+        isMountedRef.current = true;
         return () => {
+            isMountedRef.current = false;
             if (wsRef.current) {
                 aiService.closeStream(wsRef.current);
             }
@@ -147,50 +151,80 @@ export default function CameraAIScreen() {
 
     // Callback để xử lý detection từ frame processor (chạy trên JS thread)
     const handleDetectionData = useCallback((data: AIDetectionResponse) => {
+        // Kiểm tra nếu component đã unmount thì không làm gì
+        if (!isMountedRef.current) return;
+
         if (data.status === 'captured') {
-            setDetectionResult(data);
-            if (data.processed_media_base64) {
-                setAnnotatedImage(`data:${data.media_type};base64,${data.processed_media_base64}`);
-            }
+            // Chỉ cập nhật state nếu vẫn mounted
+            if (isMountedRef.current) {
+                setDetectionResult(data);
+                if (data.processed_media_base64) {
+                    setAnnotatedImage(`data:${data.media_type};base64,${data.processed_media_base64}`);
+                }
 
-            stopRealTimeDetection();
-
-            const detections = data.detections || [];
-            if (detections.length > 0) {
-                Alert.alert(
-                    'Phát hiện bệnh',
-                    `Tìm thấy ${detections.length} bệnh. Bạn có muốn tạo báo cáo?`,
-                    [
-                        { text: 'Hủy', style: 'cancel' },
-                        {
-                            text: 'Tạo báo cáo',
-                            onPress: () => navigateToDiseaseReport(data),
-                        },
-                    ]
-                );
+                const detections = data.detections || [];
+                if (detections.length > 0) {
+                    // Hiện Alert TRƯỚC, sau đó mới dừng WebSocket
+                    Alert.alert(
+                        'Phát hiện bệnh',
+                        `Tìm thấy ${detections.length} bệnh. Bạn có muốn tạo báo cáo?`,
+                        [
+                            {
+                                text: 'Hủy',
+                                style: 'cancel',
+                                onPress: () => {
+                                    stopRealTimeDetection();
+                                }
+                            },
+                            {
+                                text: 'Tạo báo cáo',
+                                onPress: () => {
+                                    stopRealTimeDetection();
+                                    navigateToDiseaseReport(data);
+                                },
+                            },
+                        ],
+                        { cancelable: false }
+                    );
+                } else {
+                    stopRealTimeDetection();
+                }
             }
         } else if (data.detections !== undefined) {
+            // Chỉ cập nhật state nếu vẫn mounted
+            if (!isMountedRef.current) return;
+
             setDetectionResult(data);
 
             // Nếu có detection (bất kể confidence), cho phép tạo báo cáo
             if (data.detections.length > 0) {
                 const highestConf = Math.max(...data.detections.map(d => d.confidence));
 
-                // Cho phép tạo báo cáo miễn có phát hiện bệnh
-                Alert.alert(
-                    'Phát hiện bệnh',
-                    `Tìm thấy ${data.detections.length} bệnh (độ tin cậy: ${(highestConf * 100).toFixed(1)}%). Bạn có muốn tạo báo cáo?`,
-                    [
-                        { text: 'Tiếp tục quét', style: 'cancel' },
-                        {
-                            text: 'Tạo báo cáo',
-                            onPress: () => {
-                                stopRealTimeDetection();
-                                navigateToDiseaseReport(data);
+                // Chỉ hiện alert nếu vẫn mounted
+                if (isMountedRef.current) {
+                    // Hiện Alert TRƯỚC, sau đó mới dừng WebSocket
+                    Alert.alert(
+                        'Phát hiện bệnh',
+                        `Tìm thấy ${data.detections.length} bệnh (độ tin cậy: ${(highestConf * 100).toFixed(1)}%). Bạn có muốn tạo báo cáo?`,
+                        [
+                            {
+                                text: 'Tiếp tục quét',
+                                style: 'cancel',
+                                onPress: () => {
+                                    // Không dừng, để tiếp tục quét
+                                }
                             },
-                        },
-                    ]
-                );
+                            {
+                                text: 'Tạo báo cáo',
+                                onPress: () => {
+                                    stopRealTimeDetection();
+                                    navigateToDiseaseReport(data);
+                                },
+                            },
+                        ],
+                        { cancelable: false }
+                    );
+                }
             }
         }
     }, [navigateToDiseaseReport]);
@@ -240,12 +274,20 @@ export default function CameraAIScreen() {
         try {
             const ws = aiService.createStreamConnection(
                 handleDetectionData,
-                (error) => {
-                    Alert.alert('Lỗi', 'Mất kết nối với AI service');
-                    stopRealTimeDetection();
+                (error: any) => {
+                    // KHÔNG hiện bất kỳ alert nào khi WebSocket đóng
+                    // Chỉ cleanup state
+                    if (isMountedRef.current) {
+                        setIsStreaming(false);
+                    }
+                    isStreamingRef.current = false;
+                    wsRef.current = null;
                 },
                 () => {
-                    setIsStreaming(false);
+                    // Chỉ cleanup state, KHÔNG hiện alert
+                    if (isMountedRef.current) {
+                        setIsStreaming(false);
+                    }
                     isStreamingRef.current = false;
                     wsRef.current = null;
                 }
@@ -298,26 +340,46 @@ export default function CameraAIScreen() {
                 }
             }, 1500);
         } catch {
-            Alert.alert('Lỗi', 'Không thể kết nối AI service');
+            // Chỉ cleanup state, KHÔNG hiện alert
             setIsStreaming(false);
             isStreamingRef.current = false;
         }
     };
 
     const stopRealTimeDetection = () => {
-        isStreamingRef.current = false;
-        setIsStreaming(false);
+        // Đánh dấu đây là đóng có chủ đích
+        isIntentionalCloseRef.current = true;
 
+        // Dừng ngay lập tức
+        isStreamingRef.current = false;
+
+        if (isMountedRef.current) {
+            setIsStreaming(false);
+        }
+
+        // Đóng WebSocket
         if (wsRef.current) {
             try {
-                aiService.closeStream(wsRef.current);
-                wsRef.current = null;
+                // Kiểm tra nếu WebSocket vẫn đang mở
+                if (wsRef.current.readyState === WebSocket.OPEN ||
+                    wsRef.current.readyState === WebSocket.CONNECTING) {
+                    aiService.closeStream(wsRef.current);
+                }
             } catch {
+                // Bỏ qua lỗi khi đóng
+            } finally {
                 wsRef.current = null;
             }
         }
 
-        setDetectionResult(null);
+        if (isMountedRef.current) {
+            setDetectionResult(null);
+        }
+
+        // Reset flag sau 500ms
+        setTimeout(() => {
+            isIntentionalCloseRef.current = false;
+        }, 500);
     };
 
     // Permission check

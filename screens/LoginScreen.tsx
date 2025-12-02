@@ -36,12 +36,12 @@ export default function LoginScreen() {
     const inputBg = useThemeColor({ light: '#ffffff', dark: '#111' }, 'background');
     const textColor = useThemeColor({ light: '#0f1720', dark: '#fff' }, 'text');
     const labelColor = useThemeColor({ light: '#66707a', dark: '#bbb' }, 'text');
-    const buttonBg = useThemeColor({ light: '#0a7ea4', dark: '#66BB6A' }, 'tint');
+    const buttonBg = useThemeColor({ light: '#66BB6A', dark: '#66BB6A' }, 'tint');
     const btnTextColor = useThemeColor({ light: '#ffffff', dark: '#000000' }, 'text');
 
     const handleLogin = async () => {
         if (!username || !password) {
-            Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
+            Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ thông tin');
             return;
         }
 
@@ -52,12 +52,10 @@ export default function LoginScreen() {
             if (result.success) {
                 // Navigate to main app
                 router.replace('/(tabs)');
-            } else {
-                Alert.alert('Đăng nhập thất bại', result.error || 'Vui lòng kiểm tra lại thông tin');
             }
         } catch (error: any) {
 
-            Alert.alert('Lỗi', error?.response?.data?.message || 'Có lỗi xảy ra khi đăng nhập');
+            Alert.alert('Thông báo', error?.response?.data?.message || 'Có lỗi xảy ra khi đăng nhập');
         } finally {
             setLoading(false);
         }
@@ -82,7 +80,7 @@ export default function LoginScreen() {
             const userResult = await authService.getUserByUsername(resetUsername);
 
             if (!userResult.success || !userResult.data) {
-                Alert.alert('Lỗi', userResult.error || 'Không tìm thấy người dùng với tên đăng nhập này');
+                Alert.alert('Thông báo', userResult.error || 'Không tìm thấy người dùng với tên đăng nhập này');
                 return;
             }
 
