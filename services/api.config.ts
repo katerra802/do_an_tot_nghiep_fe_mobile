@@ -4,7 +4,7 @@ import { Alert } from 'react-native';
 // Cấu hình base URLs
 export const API_CONFIG = {
     // Backend API (sẽ được deploy sau)
-    BACKEND_URL: 'http://192.168.1.3:3000/api', // IP máy tính trong mạng local
+    BACKEND_URL: 'https://do-an-tot-nghiep-be-7pnn.onrender.com/api', // IP máy tính trong mạng local
 
     // AI Model API (Python FastAPI)
     AI_URL: 'https://katerra-datn-be-model-ai.hf.space', // URL của Model AI
